@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>じいじのバイク旅 〜愛媛から鎌倉へ〜</title>
     <script>
-        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1501';
+        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1516';
         const currentHtmlVersion = new URLSearchParams(window.location.search).get('htmlv');
         if (currentHtmlVersion !== window.__JIJI_BUILD_VERSION) {
             const cacheBustedUrl = new URL(window.location.href);
@@ -66,6 +66,27 @@
                 flex: 0 0 auto;
                 aspect-ratio: 16 / 9;
             }
+        }
+        .mobile-play-panel {
+            display: none;
+        }
+        @media (max-width: 639px) {
+            .mobile-play-panel.is-active {
+                display: flex;
+            }
+        }
+        .support-ticker {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .support-ticker-track {
+            display: inline-block;
+            min-width: 200%;
+            animation: supportTicker 18s linear infinite;
+        }
+        @keyframes supportTicker {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
         }
     </style>
 </head>
@@ -231,6 +252,18 @@
                     <span class="text-xs text-stone-400">道のり: </span>
                     <span id="hudDistance" class="font-bold text-yellow-400 text-sm">0</span>
                     <span class="text-xs text-stone-300"> / 848 km</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobilePlayPanel" class="mobile-play-panel flex-1 min-h-0 flex-col justify-center gap-3 rounded-lg border-2 border-stone-700 bg-stone-950/70 p-3">
+            <button id="mobileJumpBtn" type="button" class="w-full rounded-lg border-2 border-yellow-200 bg-yellow-400 py-5 text-2xl font-bold text-black shadow-[0_6px_0_#ca8a04] active:translate-y-1 active:shadow-[0_2px_0_#ca8a04]">
+                ジャンプ
+            </button>
+            <div class="support-ticker rounded-md border border-stone-700 bg-stone-900 px-3 py-2 text-sm font-bold text-yellow-300">
+                <div class="support-ticker-track">
+                    じいじ、いけー！　孫たちが待ってるよ！　安全運転でがんばって！　あと少し、ふんばれじいじ！　
+                    じいじ、いけー！　孫たちが待ってるよ！　安全運転でがんばって！　あと少し、ふんばれじいじ！　
                 </div>
             </div>
         </div>
@@ -479,6 +512,7 @@
         // --- ゲームエンジン＆設定 ---
         const canvas = document.getElementById('gameCanvas');
         const gameViewport = document.getElementById('gameViewport');
+        const mobilePlayPanel = document.getElementById('mobilePlayPanel');
         const ctx = canvas.getContext('2d');
         const PLAY_LOGICAL_WIDTH = 768;
         const PLAY_LOGICAL_HEIGHT = 432;
@@ -498,6 +532,7 @@
         function setGameViewportMode(mode) {
             gameViewport.classList.toggle('is-menu', mode === 'menu');
             gameViewport.classList.toggle('is-play', mode === 'play');
+            mobilePlayPanel.classList.toggle('is-active', mode === 'play');
             resizeCanvas();
         }
 
@@ -552,7 +587,7 @@
             stage3: 'images/ステージ3.png',
             stage4: 'images/ステージ4.png'
         };
-        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1501';
+        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1516';
         const ASSET_VERSION = BUILD_VERSION;
         const CHROMA_KEY_IMAGES = new Set(['player', 'playerJump', 'boar', 'boarRun', 'house', 'grandkids', 'grandkidsWave']);
         console.info(`じいじのバイク旅 build: ${BUILD_VERSION}`);
@@ -1984,6 +2019,16 @@
         }, { passive: false });
 
         canvas.addEventListener('mousedown', (e) => {
+            triggerJump();
+        });
+
+        document.getElementById('mobileJumpBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            triggerJump();
+        }, { passive: false });
+
+        document.getElementById('mobileJumpBtn').addEventListener('click', (e) => {
+            e.preventDefault();
             triggerJump();
         });
 
