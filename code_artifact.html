@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>じいじのバイク旅 〜愛媛から鎌倉へ〜</title>
     <script>
-        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1424';
+        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1436';
         const currentHtmlVersion = new URLSearchParams(window.location.search).get('htmlv');
         if (currentHtmlVersion !== window.__JIJI_BUILD_VERSION) {
             const cacheBustedUrl = new URL(window.location.href);
@@ -101,7 +101,7 @@
         </div>
 
         <!-- ゲームエリア（Canvas ＆ 各種画面オーバーレイ） -->
-        <div class="relative w-full flex-1 min-h-0 sm:flex-none sm:aspect-[16/9] bg-sky-200 rounded-lg overflow-hidden border-4 border-stone-950 shadow-inner">
+        <div class="relative w-full flex-none aspect-[16/9] bg-sky-200 rounded-lg overflow-hidden border-4 border-stone-950 shadow-inner">
             <!-- ゲーム本体キャンバス -->
             <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
@@ -181,7 +181,7 @@
                         <p class="text-xs text-stone-500 mt-1">走破距離: <span id="overDistance" class="text-white font-bold">120</span> / 848 km</p>
                     </div>
                     <button id="retryGameBtn" class="w-full py-3 text-lg font-bold text-black rounded-lg pixel-btn-yellow tracking-wider">
-                        もういちど挑戦する
+                        タイトルに戻る
                     </button>
                 </div>
             </div>
@@ -199,7 +199,7 @@
                         <p id="clearHearts" class="text-xl text-red-500 tracking-widest">♥♥♥</p>
                     </div>
                     <button id="restartGameBtn" class="w-full py-3 text-lg font-bold text-white rounded-lg pixel-btn-green tracking-wider">
-                        もう一度旅に出る
+                        タイトルに戻る
                     </button>
                 </div>
             </div>
@@ -468,9 +468,8 @@
         function resizeCanvas() {
             const container = canvas.parentElement;
             const containerWidth = container.clientWidth;
-            const isMobileLayout = window.matchMedia('(max-width: 639px)').matches;
             canvas.width = containerWidth;
-            canvas.height = isMobileLayout ? container.clientHeight : containerWidth * (9 / 16);
+            canvas.height = containerWidth * (9 / 16);
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
@@ -523,7 +522,7 @@
             stage3: 'images/ステージ3.png',
             stage4: 'images/ステージ4.png'
         };
-        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1424';
+        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1436';
         const ASSET_VERSION = BUILD_VERSION;
         const CHROMA_KEY_IMAGES = new Set(['player', 'playerJump', 'boar', 'boarRun', 'house', 'grandkids', 'grandkidsWave']);
         console.info(`じいじのバイク旅 build: ${BUILD_VERSION}`);
@@ -1730,6 +1729,20 @@
             }
         }
 
+        function returnToTitle() {
+            sound.pauseBgm();
+            currentState = GAME_STATE.START;
+            gameSpeed = 0;
+            clearSequenceTimer = 0;
+            countdownTimer = 0;
+
+            document.getElementById('countdownScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('gameClearScreen').classList.add('hidden');
+            document.getElementById('hud').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+
         // --- STREAMING_CHUNK: Main Game Loop ---
         // --- メインゲームループ ---
         function gameLoop() {
@@ -1948,8 +1961,8 @@
         document.getElementById('noriModeBtn').addEventListener('click', () => selectBgmMode('nori'));
         document.getElementById('shinmiriModeBtn').addEventListener('click', () => selectBgmMode('shinmiri'));
         document.getElementById('startGameBtn').addEventListener('click', startGame);
-        document.getElementById('retryGameBtn').addEventListener('click', startGame);
-        document.getElementById('restartGameBtn').addEventListener('click', startGame);
+        document.getElementById('retryGameBtn').addEventListener('click', returnToTitle);
+        document.getElementById('restartGameBtn').addEventListener('click', returnToTitle);
         updateModeButtons();
 
         // ゲーム起動
