@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>じいじのバイク旅 〜愛媛から鎌倉へ〜</title>
     <script>
-        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-2100';
+        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-2130';
         const currentHtmlVersion = new URLSearchParams(window.location.search).get('htmlv');
         if (currentHtmlVersion !== window.__JIJI_BUILD_VERSION) {
             const cacheBustedUrl = new URL(window.location.href);
@@ -562,7 +562,6 @@
             mobileSupportText.textContent = message;
             mobileSupportImage.src = `${IMAGE_SOURCES[(milestone / 50) % 2 === 0 ? 'grandkids' : 'grandkidsWave']}?v=${ASSET_VERSION}`;
             mobileSupportBubble.classList.add('is-visible');
-            supportBubbleTimer = 240;
         }
 
         function updateSupportBubble() {
@@ -575,13 +574,6 @@
             if (SUPPORT_MESSAGES_BY_DISTANCE[milestone] && milestone !== lastSupportMilestone) {
                 lastSupportMilestone = milestone;
                 showSupportBubble(milestone);
-            }
-
-            if (supportBubbleTimer > 0) {
-                supportBubbleTimer--;
-                if (supportBubbleTimer <= 0) {
-                    mobileSupportBubble.classList.remove('is-visible');
-                }
             }
         }
 
@@ -636,7 +628,7 @@
             stage3: 'images/stage-3.png',
             stage4: 'images/stage-4.png'
         };
-        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-2100';
+        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-2130';
         const ASSET_VERSION = BUILD_VERSION;
         const CHROMA_KEY_IMAGES = new Set(['player', 'playerJump', 'boar', 'boarRun', 'house', 'grandkids', 'grandkidsWave']);
         console.info(`じいじのバイク旅 build: ${BUILD_VERSION}`);
