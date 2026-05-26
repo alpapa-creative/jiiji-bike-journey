@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>じいじのバイク旅 〜愛媛から鎌倉へ〜</title>
     <script>
-        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1436';
+        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1448';
         const currentHtmlVersion = new URLSearchParams(window.location.search).get('htmlv');
         if (currentHtmlVersion !== window.__JIJI_BUILD_VERSION) {
             const cacheBustedUrl = new URL(window.location.href);
@@ -51,6 +51,21 @@
         .pixel-btn-green:active {
             transform: translateY(4px);
             box-shadow: 0 2px 0 #16a34a;
+        }
+        .game-viewport {
+            flex: 0 0 auto;
+            aspect-ratio: 16 / 9;
+        }
+        @media (max-width: 639px) {
+            .game-viewport.is-menu {
+                flex: 1 1 0;
+                min-height: 0;
+                aspect-ratio: auto;
+            }
+            .game-viewport.is-play {
+                flex: 0 0 auto;
+                aspect-ratio: 16 / 9;
+            }
         }
     </style>
 </head>
@@ -101,7 +116,7 @@
         </div>
 
         <!-- ゲームエリア（Canvas ＆ 各種画面オーバーレイ） -->
-        <div class="relative w-full flex-none aspect-[16/9] bg-sky-200 rounded-lg overflow-hidden border-4 border-stone-950 shadow-inner">
+        <div id="gameViewport" class="game-viewport is-menu relative w-full bg-sky-200 rounded-lg overflow-hidden border-4 border-stone-950 shadow-inner">
             <!-- ゲーム本体キャンバス -->
             <canvas id="gameCanvas" class="w-full h-full block"></canvas>
 
@@ -463,14 +478,22 @@
 
         // --- ゲームエンジン＆設定 ---
         const canvas = document.getElementById('gameCanvas');
+        const gameViewport = document.getElementById('gameViewport');
         const ctx = canvas.getContext('2d');
 
         function resizeCanvas() {
-            const container = canvas.parentElement;
-            const containerWidth = container.clientWidth;
+            const containerWidth = gameViewport.clientWidth;
+            const isMobileMenu = window.matchMedia('(max-width: 639px)').matches && gameViewport.classList.contains('is-menu');
             canvas.width = containerWidth;
-            canvas.height = containerWidth * (9 / 16);
+            canvas.height = isMobileMenu ? gameViewport.clientHeight : containerWidth * (9 / 16);
         }
+
+        function setGameViewportMode(mode) {
+            gameViewport.classList.toggle('is-menu', mode === 'menu');
+            gameViewport.classList.toggle('is-play', mode === 'play');
+            resizeCanvas();
+        }
+
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
@@ -522,7 +545,7 @@
             stage3: 'images/ステージ3.png',
             stage4: 'images/ステージ4.png'
         };
-        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1436';
+        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1448';
         const ASSET_VERSION = BUILD_VERSION;
         const CHROMA_KEY_IMAGES = new Set(['player', 'playerJump', 'boar', 'boarRun', 'house', 'grandkids', 'grandkidsWave']);
         console.info(`じいじのバイク旅 build: ${BUILD_VERSION}`);
@@ -1683,6 +1706,7 @@
         // --- STREAMING_CHUNK: Game State Management ---
         // --- ゲーム開始 ---
         function startGame() {
+            setGameViewportMode('play');
             sound.init();
             sound.setMode(selectedBgmMode);
             sound.restartBgm();
@@ -1712,6 +1736,7 @@
         // --- ゲーム終了 ---
         function endGame(isClear) {
             document.getElementById('hud').classList.add('hidden');
+            setGameViewportMode('menu');
             sound.pauseBgm();
             if (isClear) {
                 currentState = GAME_STATE.CLEAR;
@@ -1731,6 +1756,7 @@
 
         function returnToTitle() {
             sound.pauseBgm();
+            setGameViewportMode('menu');
             currentState = GAME_STATE.START;
             gameSpeed = 0;
             clearSequenceTimer = 0;
