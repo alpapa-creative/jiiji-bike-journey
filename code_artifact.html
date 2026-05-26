@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>じいじのバイク旅 〜愛媛から鎌倉へ〜</title>
     <script>
-        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1516';
+        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1530';
         const currentHtmlVersion = new URLSearchParams(window.location.search).get('htmlv');
         if (currentHtmlVersion !== window.__JIJI_BUILD_VERSION) {
             const cacheBustedUrl = new URL(window.location.href);
@@ -75,18 +75,27 @@
                 display: flex;
             }
         }
-        .support-ticker {
-            overflow: hidden;
-            white-space: nowrap;
+        .support-bubble {
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
         }
-        .support-ticker-track {
-            display: inline-block;
-            min-width: 200%;
-            animation: supportTicker 18s linear infinite;
+        .support-bubble.is-visible {
+            opacity: 1;
+            transform: translateY(0);
         }
-        @keyframes supportTicker {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
+        .support-bubble-text::before {
+            content: "";
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            width: 14px;
+            height: 14px;
+            background: #fff7ed;
+            border-left: 2px solid #facc15;
+            border-bottom: 2px solid #facc15;
+            transform: translateY(-50%) rotate(45deg);
         }
     </style>
 </head>
@@ -260,10 +269,10 @@
             <button id="mobileJumpBtn" type="button" class="w-full rounded-lg border-2 border-yellow-200 bg-yellow-400 py-5 text-2xl font-bold text-black shadow-[0_6px_0_#ca8a04] active:translate-y-1 active:shadow-[0_2px_0_#ca8a04]">
                 ジャンプ
             </button>
-            <div class="support-ticker rounded-md border border-stone-700 bg-stone-900 px-3 py-2 text-sm font-bold text-yellow-300">
-                <div class="support-ticker-track">
-                    じいじ、いけー！　孫たちが待ってるよ！　安全運転でがんばって！　あと少し、ふんばれじいじ！　
-                    じいじ、いけー！　孫たちが待ってるよ！　安全運転でがんばって！　あと少し、ふんばれじいじ！　
+            <div id="mobileSupportBubble" class="support-bubble flex items-center gap-2">
+                <img id="mobileSupportImage" class="h-16 w-20 flex-none object-contain" src="images/こどもたち.png" alt="こどもたち">
+                <div class="support-bubble-text relative min-h-14 flex-1 rounded-lg border-2 border-yellow-400 bg-orange-50 px-4 py-3 text-sm font-bold leading-snug text-stone-900 shadow-[0_4px_0_rgba(0,0,0,0.35)]">
+                    <span id="mobileSupportText">じいじ、いけー！</span>
                 </div>
             </div>
         </div>
@@ -513,6 +522,9 @@
         const canvas = document.getElementById('gameCanvas');
         const gameViewport = document.getElementById('gameViewport');
         const mobilePlayPanel = document.getElementById('mobilePlayPanel');
+        const mobileSupportBubble = document.getElementById('mobileSupportBubble');
+        const mobileSupportText = document.getElementById('mobileSupportText');
+        const mobileSupportImage = document.getElementById('mobileSupportImage');
         const ctx = canvas.getContext('2d');
         const PLAY_LOGICAL_WIDTH = 768;
         const PLAY_LOGICAL_HEIGHT = 432;
@@ -533,7 +545,43 @@
             gameViewport.classList.toggle('is-menu', mode === 'menu');
             gameViewport.classList.toggle('is-play', mode === 'play');
             mobilePlayPanel.classList.toggle('is-active', mode === 'play');
+            if (mode === 'menu') {
+                hideSupportBubble();
+            }
             resizeCanvas();
+        }
+
+        function hideSupportBubble() {
+            supportBubbleTimer = 0;
+            mobileSupportBubble.classList.remove('is-visible');
+        }
+
+        function showSupportBubble(milestone) {
+            const messageIndex = Math.floor(milestone / 50) % SUPPORT_MESSAGES.length;
+            mobileSupportText.textContent = SUPPORT_MESSAGES[messageIndex];
+            mobileSupportImage.src = `${IMAGE_SOURCES[messageIndex % 2 === 0 ? 'grandkids' : 'grandkidsWave']}?v=${ASSET_VERSION}`;
+            mobileSupportBubble.classList.add('is-visible');
+            supportBubbleTimer = 240;
+        }
+
+        function updateSupportBubble() {
+            if (currentState !== GAME_STATE.PLAYING) {
+                hideSupportBubble();
+                return;
+            }
+
+            const milestone = Math.floor(gameDistance / 50) * 50;
+            if (milestone >= 50 && milestone < TARGET_DISTANCE && milestone !== lastSupportMilestone) {
+                lastSupportMilestone = milestone;
+                showSupportBubble(milestone);
+            }
+
+            if (supportBubbleTimer > 0) {
+                supportBubbleTimer--;
+                if (supportBubbleTimer <= 0) {
+                    mobileSupportBubble.classList.remove('is-visible');
+                }
+            }
         }
 
         resizeCanvas();
@@ -587,7 +635,7 @@
             stage3: 'images/ステージ3.png',
             stage4: 'images/ステージ4.png'
         };
-        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1516';
+        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1530';
         const ASSET_VERSION = BUILD_VERSION;
         const CHROMA_KEY_IMAGES = new Set(['player', 'playerJump', 'boar', 'boarRun', 'house', 'grandkids', 'grandkidsWave']);
         console.info(`じいじのバイク旅 build: ${BUILD_VERSION}`);
@@ -1319,6 +1367,17 @@
         // ゴール演出用の位置管理
         let goalHouseX = -999;
         let grandchildrenJumpTimer = 0;
+        let lastSupportMilestone = 0;
+        let supportBubbleTimer = 0;
+        const SUPPORT_MESSAGES = [
+            'じいじ、こっちで待ってるよ！',
+            'その調子！バイクかっこいい！',
+            '安全運転で来てね！',
+            'じいじ、あと少しがんばって！',
+            'みんなで応援してるよ！',
+            '休まず走るじいじ、すごい！',
+            '鎌倉で待ってるからね！'
+        ];
 
         function checkCollision(a, b) {
             return (
@@ -1760,6 +1819,8 @@
             gameSpeed = 0; // カウントダウン中は進まない
             obstacleSpawnTimer = 0;
             itemSpawnTimer = 200;
+            lastSupportMilestone = 0;
+            hideSupportBubble();
 
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('gameOverScreen').classList.add('hidden');
@@ -1864,6 +1925,7 @@
                 document.getElementById('hudDistance').textContent = Math.floor(gameDistance);
 
                 document.getElementById('hudHearts').textContent = formatLives(player.lives, player.maxLives);
+                updateSupportBubble();
 
                 // 障害物出現
                 obstacleSpawnTimer--;
