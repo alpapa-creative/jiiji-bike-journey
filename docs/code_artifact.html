@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>じいじのバイク旅 〜愛媛から鎌倉へ〜</title>
+    <script>
+        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1550';
+        const currentHtmlVersion = new URLSearchParams(window.location.search).get('htmlv');
+        if (currentHtmlVersion !== window.__JIJI_BUILD_VERSION) {
+            const cacheBustedUrl = new URL(window.location.href);
+            cacheBustedUrl.searchParams.set('htmlv', window.__JIJI_BUILD_VERSION);
+            window.location.replace(cacheBustedUrl.href);
+        }
+    </script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (DotGothic16 for Retro look) -->
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'DotGothic16', 'Outfit', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        canvas {
+            image-rendering: pixelated;
+        }
+        .pixel-border {
+            box-shadow: 
+                0px -4px 0px 0px #000,
+                0px 4px 0px 0px #000,
+                -4px 0px 0px 0px #000,
+                4px 0px 0px 0px #000;
+        }
+        .pixel-btn-yellow {
+            background-color: #facc15;
+            box-shadow: 0 6px 0 #ca8a04;
+            transition: all 0.1s ease;
+        }
+        .pixel-btn-yellow:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #ca8a04;
+        }
+        .pixel-btn-green {
+            background-color: #4ade80;
+            box-shadow: 0 6px 0 #16a34a;
+            transition: all 0.1s ease;
+        }
+        .pixel-btn-green:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #16a34a;
+        }
+        .game-viewport {
+            flex: 0 0 auto;
+            aspect-ratio: 16 / 9;
+        }
+        @media (max-width: 639px) {
+            .game-viewport.is-menu {
+                flex: 1 1 0;
+                min-height: 0;
+                aspect-ratio: auto;
+            }
+            .game-viewport.is-play {
+                flex: 0 0 auto;
+                aspect-ratio: 16 / 9;
+            }
+        }
+        .mobile-play-panel {
+            display: none;
+        }
+        @media (max-width: 639px) {
+            .mobile-play-panel.is-active {
+                display: flex;
+            }
+        }
+        .support-bubble {
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+        .support-bubble.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .support-bubble-text::before {
+            content: "";
+            position: absolute;
+            left: -8px;
+            top: 50%;
+            width: 14px;
+            height: 14px;
+            background: #fff7ed;
+            border-left: 2px solid #facc15;
+            border-bottom: 2px solid #facc15;
+            transform: translateY(-50%) rotate(45deg);
+        }
+    </style>
+</head>
+<body class="bg-stone-900 text-white h-[100svh] sm:min-h-screen sm:h-auto overflow-hidden sm:overflow-auto box-border flex flex-col items-center justify-start sm:justify-center p-1 sm:p-4">
+
+    <!-- メインゲームコンテナ -->
+    <div class="w-full max-w-3xl h-full sm:h-auto min-h-0 bg-stone-800 p-2 sm:p-4 rounded-xl border-4 border-stone-700 shadow-2xl relative flex flex-col gap-2 sm:gap-4">
+        
+        <!-- ヘッダー -->
+        <div class="flex justify-between items-center bg-stone-950 p-2 sm:p-3 rounded-lg border-2 border-stone-600 gap-2">
+            <div>
+                <h1 class="text-lg sm:text-2xl font-bold text-yellow-400 tracking-wider">じいじのバイク旅</h1>
+                <p class="text-[10px] sm:text-xs text-stone-400">藤田建具店から目指せ、鎌倉の孫たちの家！</p>
+            </div>
+            <!-- 音声オン/オフボタン -->
+            <button id="soundToggleBtn" class="px-3 py-1 bg-stone-700 hover:bg-stone-600 rounded text-xs transition border border-stone-500">
+                サウンド: ON
+            </button>
+        </div>
+
+        <!-- 進捗バー（現在地メーター） -->
+        <div class="bg-stone-950 p-2 sm:p-3 rounded-lg border-2 border-stone-600 flex flex-col gap-1">
+            <div class="flex justify-between text-[10px] sm:text-xs text-stone-300">
+                <span class="font-bold text-orange-400">藤田建具店</span>
+                <span id="currentAreaText" class="text-yellow-300 font-bold">しまなみ海道を快走中！</span>
+                <span class="font-bold text-red-400">孫たちの家</span>
+            </div>
+            <div class="w-full bg-stone-800 h-5 sm:h-6 rounded-full relative overflow-hidden border border-stone-600 mt-1">
+                <!-- 背景の中間フラグ -->
+                <div class="absolute left-1/4 top-0 bottom-0 w-0.5 bg-dashed border-r border-stone-600"></div>
+                <div class="absolute left-2/4 top-0 bottom-0 w-0.5 bg-dashed border-r border-stone-600"></div>
+                <div class="absolute left-3/4 top-0 bottom-0 w-0.5 bg-dashed border-r border-stone-600"></div>
+                
+                <!-- プログレスゲージ -->
+                <div id="progressBar" class="h-full bg-gradient-to-r from-orange-500 via-yellow-500 to-emerald-500 transition-all duration-100" style="width: 0%"></div>
+                
+                <!-- バイクミニピン -->
+                <div id="progressPin" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-100 text-sm" style="left: 5%">
+                    <span class="inline-block scale-x-[-1]">🏍️</span>
+                </div>
+            </div>
+            <div class="flex justify-between text-[10px] text-stone-500 px-1 mt-1">
+                <span>0km</span>
+                <span>212km (関西)</span>
+                <span>424km (富士山)</span>
+                <span>848km (鎌倉・孫の家)</span>
+            </div>
+        </div>
+
+        <!-- ゲームエリア（Canvas ＆ 各種画面オーバーレイ） -->
+        <div id="gameViewport" class="game-viewport is-menu relative w-full bg-sky-200 rounded-lg overflow-hidden border-4 border-stone-950 shadow-inner">
+            <!-- ゲーム本体キャンバス -->
+            <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+
+            <!-- タイトル（スタート）画面オーバーレイ -->
+            <div id="startScreen" class="absolute inset-0 bg-black/85 flex flex-col items-center justify-center text-center p-3">
+                <div class="bg-stone-900/95 border-4 border-yellow-500 p-4 sm:p-6 rounded-xl max-w-lg w-full max-h-full overflow-y-auto pixel-border relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-24 h-24 bg-yellow-500/10 rounded-full blur-xl"></div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-yellow-400 mb-2 tracking-widest animate-bounce">じいじのバイク旅</h2>
+                    <p class="text-sm text-yellow-500 font-bold mb-4">〜 愛媛の建具店から鎌倉の孫の家へ 〜</p>
+
+                    <button id="howToToggleBtn" type="button" class="w-full mb-3 py-2 text-sm font-bold text-yellow-300 bg-stone-800 border-2 border-stone-600 rounded-md transition hover:bg-stone-700">
+                        遊び方
+                    </button>
+
+                    <div id="howToPanel" class="hidden mb-4 text-[11px] text-left">
+                        <div class="bg-stone-950/70 p-2.5 rounded border border-stone-700 mb-2 text-stone-300 leading-relaxed">
+                            じいじがバイクに乗って、愛媛の「藤田建具店」から鎌倉の「孫たちの家」まで、848kmの超ロングツーリングに出発！<br>
+                            エリアの後半は難易度が急上昇。<strong class="text-yellow-400">2段ジャンプ</strong>を駆使して、危険を避けるんじゃ！
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2 text-stone-400">
+                            <div class="bg-stone-950/70 p-2.5 rounded border border-stone-700"><strong class="text-white">操作:</strong> タップ / クリック / [Space]でジャンプ</div>
+                            <div class="bg-stone-950/70 p-2.5 rounded border border-stone-700"><strong class="text-white">2段ジャンプ:</strong> 空中でもう一度跳べる</div>
+                            <div class="bg-stone-950/70 p-2.5 rounded border border-stone-700"><strong class="text-white">ライフ:</strong> 3回耐えられる。名物で回復</div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div class="bg-stone-950/70 p-2.5 rounded border border-stone-700">
+                            <span class="text-red-400 font-bold block mb-1">障害物</span>
+                            <div class="space-y-1 text-stone-300">
+                                <div><span class="font-bold text-stone-200">コーン:</span> 基本の障害物</div>
+                                <div><span class="font-bold text-stone-200">背高バリケード:</span> 2段ジャンプで越える障害物</div>
+                                <div><span class="font-bold text-stone-200">飛ぶカラス:</span> 空中でぶつかりやすい障害物</div>
+                                <div><span class="font-bold text-stone-200">暴走イノシシ:</span> スピードの速い危険な獣</div>
+                            </div>
+                        </div>
+                        <div class="bg-stone-950/70 p-2.5 rounded border border-stone-700">
+                            <span class="text-emerald-400 font-bold block mb-1">回復</span>
+                            <div class="space-y-1 text-stone-300">
+                                <div><span class="font-bold text-stone-200">愛媛みかん:</span> ライフが1回復</div>
+                                <div><span class="font-bold text-stone-200">静岡茶:</span> ライフが1回復</div>
+                                <div><span class="font-bold text-stone-200">おにぎり:</span> 元気いっぱいに回復</div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 text-left">
+                        <p class="text-[11px] text-stone-400 mb-2 text-center">BGMモードを選んで出発</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="noriModeBtn" type="button" class="bg-yellow-400 text-black border-2 border-yellow-200 rounded-md py-2 px-2 text-sm font-bold transition">
+                                ノリノリモード
+                            </button>
+                            <button id="shinmiriModeBtn" type="button" class="bg-stone-800 text-stone-200 border-2 border-stone-600 rounded-md py-2 px-2 text-sm font-bold transition">
+                                まったりモード
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button id="startGameBtn" class="w-full py-4 text-xl font-bold text-black rounded-lg pixel-btn-yellow uppercase tracking-widest">
+                        旅に出る
+                    </button>
+                </div>
+            </div>
+
+            <!-- カウントダウン表示 -->
+            <div id="countdownScreen" class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
+                <span id="countdownText" class="text-8xl font-black text-yellow-400 drop-shadow-[0_8px_0_rgba(0,0,0,0.8)] animate-ping">3</span>
+            </div>
+
+            <!-- ゲームオーバー画面オーバーレイ -->
+            <div id="gameOverScreen" class="absolute inset-0 bg-black/85 flex flex-col items-center justify-center text-center p-4 hidden">
+                <div class="bg-stone-900/95 border-4 border-red-600 p-6 rounded-xl max-w-md w-full pixel-border">
+                    <h2 class="text-3xl font-bold text-red-500 mb-2">リタイア...</h2>
+                    <p class="text-sm text-stone-400 mb-2">じいじのバイクがエンストしてしまった！</p>
+                    <div class="bg-stone-950 p-3 rounded-lg border border-stone-800 my-4">
+                        <p class="text-xs text-stone-400">到達エリア</p>
+                        <p id="overAreaName" class="text-lg font-bold text-yellow-400">しまなみ海道</p>
+                        <p class="text-xs text-stone-500 mt-1">走破距離: <span id="overDistance" class="text-white font-bold">120</span> / 848 km</p>
+                    </div>
+                    <button id="retryGameBtn" class="w-full py-3 text-lg font-bold text-black rounded-lg pixel-btn-yellow tracking-wider">
+                        タイトルに戻る
+                    </button>
+                </div>
+            </div>
+
+            <!-- ゲームクリア画面オーバーレイ -->
+            <div id="gameClearScreen" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-center p-4 hidden">
+                <div class="bg-stone-900/95 border-4 border-emerald-500 p-6 rounded-xl max-w-md w-full pixel-border">
+                    <h2 class="text-3xl font-extrabold text-emerald-400 mb-1 animate-pulse">ゴール到着！！</h2>
+                    <p class="text-yellow-300 font-bold text-sm mb-4">無事完走！孫たちが待ってるぞ！</p>
+                    <p class="text-xs text-stone-300 leading-relaxed mb-6">
+                        じいじは数々の困難（とカラス）を乗り越え、藤田建具店から848kmを走り抜いて、ついに鎌倉の「孫たちの家」にたどり着きました！みんな大喜びです！
+                    </p>
+                    <div class="bg-stone-950 p-3 rounded-lg border border-stone-800 mb-6">
+                        <p class="text-xs text-stone-400">残りライフ</p>
+                        <p id="clearHearts" class="text-xl text-red-500 tracking-widest">♥♥♥</p>
+                    </div>
+                    <button id="restartGameBtn" class="w-full py-3 text-lg font-bold text-white rounded-lg pixel-btn-green tracking-wider">
+                        タイトルに戻る
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 画面上HUD（プレイ中のみ表示） -->
+            <div id="hud" class="absolute top-2 left-2 right-2 flex justify-between pointer-events-none hidden">
+                <!-- ライフ表示 -->
+                <div class="bg-black/60 px-3 py-1.5 rounded-lg flex items-center gap-1 border border-stone-700">
+                    <span class="text-xs text-stone-400 mr-1">LIFE:</span>
+                    <span id="hudHearts" class="text-red-500 text-sm tracking-wider">♥♥♥</span>
+                </div>
+                <!-- 距離メーター -->
+                <div class="bg-black/60 px-3 py-1.5 rounded-lg text-right border border-stone-700">
+                    <span class="text-xs text-stone-400">道のり: </span>
+                    <span id="hudDistance" class="font-bold text-yellow-400 text-sm">0</span>
+                    <span class="text-xs text-stone-300"> / 848 km</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobilePlayPanel" class="mobile-play-panel flex-1 min-h-0 flex-col justify-center gap-3 rounded-lg border-2 border-stone-700 bg-stone-950/70 p-3">
+            <button id="mobileJumpBtn" type="button" class="w-full rounded-lg border-2 border-yellow-200 bg-yellow-400 py-5 text-2xl font-bold text-black shadow-[0_6px_0_#ca8a04] active:translate-y-1 active:shadow-[0_2px_0_#ca8a04]">
+                ジャンプ
+            </button>
+            <div id="mobileSupportBubble" class="support-bubble flex items-center gap-2">
+                <img id="mobileSupportImage" class="h-16 w-20 flex-none object-contain" src="images/こどもたち.png" alt="こどもたち">
+                <div class="support-bubble-text relative min-h-14 flex-1 rounded-lg border-2 border-yellow-400 bg-orange-50 px-4 py-3 text-sm font-bold leading-snug text-stone-900 shadow-[0_4px_0_rgba(0,0,0,0.35)]">
+                    <span id="mobileSupportText">じいじ、いけー！</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- サウンドシステム (Web Audio API) ---
+        const BGM_SOURCES = {
+            nori: 'bgm-bike-jiiji.mp3',
+            shinmiri: 'bgm-bike-jiiji-shinmiri.mp3'
+        };
+        const BGM_VOLUME = 0.35;
+
+        class SoundManager {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+                this.bgm = null;
+                this.bgmShouldPlay = false;
+                this.currentMode = 'nori';
+                this.setupBgm(this.currentMode);
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            setupBgm(mode) {
+                const source = BGM_SOURCES[mode];
+                if (!source) return;
+                this.bgm = new Audio(source);
+                this.bgm.loop = true;
+                this.bgm.volume = BGM_VOLUME;
+                this.bgm.preload = 'auto';
+            }
+
+            setMode(mode) {
+                if (!BGM_SOURCES[mode] || this.currentMode === mode) return;
+                const wasPlaying = this.bgmShouldPlay;
+                if (this.bgm) {
+                    this.bgm.pause();
+                }
+                this.currentMode = mode;
+                this.setupBgm(mode);
+                this.bgmShouldPlay = wasPlaying;
+                this.syncBgmWithToggle();
+            }
+
+            playBgm() {
+                this.bgmShouldPlay = true;
+                if (!this.enabled || !this.bgm) return;
+                this.bgm.play().catch(() => {
+                    // ブラウザの自動再生制限などで失敗した場合は、次のユーザー操作で再試行する。
+                });
+            }
+
+            pauseBgm() {
+                this.bgmShouldPlay = false;
+                if (this.bgm) {
+                    this.bgm.pause();
+                }
+            }
+
+            restartBgm() {
+                if (this.bgm) {
+                    this.bgm.currentTime = 0;
+                }
+                this.playBgm();
+            }
+
+            syncBgmWithToggle() {
+                if (this.enabled && this.bgmShouldPlay) {
+                    this.playBgm();
+                } else if (this.bgm) {
+                    this.bgm.pause();
+                }
+            }
+
+            playBeep(freq, duration) {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            }
+
+            playJump() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                
+                osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.15);
+                
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            playDamage() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(80, this.ctx.currentTime + 0.3);
+                
+                gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+
+            playHeal() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const notes = [440, 554, 659, 880];
+                notes.forEach((freq, index) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + index * 0.05);
+                    gain.gain.setValueAtTime(0.2, now + index * 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + index * 0.05 + 0.15);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + index * 0.05);
+                    osc.stop(now + index * 0.05 + 0.15);
+                });
+            }
+
+            playClear() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const melody = [523, 587, 659, 698, 784, 880, 987, 1046];
+                
+                melody.forEach((freq, index) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, now + index * 0.1);
+                    gain.gain.setValueAtTime(0.15, now + index * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + index * 0.1 + 0.2);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + index * 0.1);
+                    osc.stop(now + index * 0.1 + 0.25);
+                });
+            }
+
+            playGameOver() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const melody = [261, 246, 233, 220];
+                
+                melody.forEach((freq, index) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + index * 0.2);
+                    gain.gain.setValueAtTime(0.3, now + index * 0.2);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + index * 0.2 + 0.3);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + index * 0.2);
+                    osc.stop(now + index * 0.2 + 0.35);
+                });
+            }
+        }
+
+        const sound = new SoundManager();
+        let selectedBgmMode = 'nori';
+
+        function updateModeButtons() {
+            const noriModeBtn = document.getElementById('noriModeBtn');
+            const shinmiriModeBtn = document.getElementById('shinmiriModeBtn');
+            if (!noriModeBtn || !shinmiriModeBtn) return;
+
+            const selectedClasses = ['bg-yellow-400', 'text-black', 'border-yellow-200'];
+            const idleClasses = ['bg-stone-800', 'text-stone-200', 'border-stone-600'];
+
+            noriModeBtn.classList.toggle(selectedClasses[0], selectedBgmMode === 'nori');
+            noriModeBtn.classList.toggle(selectedClasses[1], selectedBgmMode === 'nori');
+            noriModeBtn.classList.toggle(selectedClasses[2], selectedBgmMode === 'nori');
+            noriModeBtn.classList.toggle(idleClasses[0], selectedBgmMode !== 'nori');
+            noriModeBtn.classList.toggle(idleClasses[1], selectedBgmMode !== 'nori');
+            noriModeBtn.classList.toggle(idleClasses[2], selectedBgmMode !== 'nori');
+
+            shinmiriModeBtn.classList.toggle(selectedClasses[0], selectedBgmMode === 'shinmiri');
+            shinmiriModeBtn.classList.toggle(selectedClasses[1], selectedBgmMode === 'shinmiri');
+            shinmiriModeBtn.classList.toggle(selectedClasses[2], selectedBgmMode === 'shinmiri');
+            shinmiriModeBtn.classList.toggle(idleClasses[0], selectedBgmMode !== 'shinmiri');
+            shinmiriModeBtn.classList.toggle(idleClasses[1], selectedBgmMode !== 'shinmiri');
+            shinmiriModeBtn.classList.toggle(idleClasses[2], selectedBgmMode !== 'shinmiri');
+        }
+
+        function selectBgmMode(mode) {
+            selectedBgmMode = mode;
+            sound.setMode(mode);
+            updateModeButtons();
+        }
+
+        // 音声トグル
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
+        soundToggleBtn.addEventListener('click', () => {
+            sound.enabled = !sound.enabled;
+            if (sound.enabled) {
+                soundToggleBtn.textContent = 'サウンド: ON';
+                soundToggleBtn.classList.remove('bg-stone-600');
+                soundToggleBtn.classList.add('bg-stone-700');
+            } else {
+                soundToggleBtn.textContent = 'サウンド: OFF';
+                soundToggleBtn.classList.remove('bg-stone-700');
+                soundToggleBtn.classList.add('bg-stone-600');
+            }
+            sound.syncBgmWithToggle();
+        });
+
+        // --- ゲームエンジン＆設定 ---
+        const canvas = document.getElementById('gameCanvas');
+        const gameViewport = document.getElementById('gameViewport');
+        const mobilePlayPanel = document.getElementById('mobilePlayPanel');
+        const mobileSupportBubble = document.getElementById('mobileSupportBubble');
+        const mobileSupportText = document.getElementById('mobileSupportText');
+        const mobileSupportImage = document.getElementById('mobileSupportImage');
+        const ctx = canvas.getContext('2d');
+        const PLAY_LOGICAL_WIDTH = 768;
+        const PLAY_LOGICAL_HEIGHT = 432;
+
+        function resizeCanvas() {
+            const containerWidth = gameViewport.clientWidth;
+            const isMobileMenu = window.matchMedia('(max-width: 639px)').matches && gameViewport.classList.contains('is-menu');
+            if (isMobileMenu) {
+                canvas.width = containerWidth;
+                canvas.height = gameViewport.clientHeight;
+            } else {
+                canvas.width = PLAY_LOGICAL_WIDTH;
+                canvas.height = PLAY_LOGICAL_HEIGHT;
+            }
+        }
+
+        function setGameViewportMode(mode) {
+            gameViewport.classList.toggle('is-menu', mode === 'menu');
+            gameViewport.classList.toggle('is-play', mode === 'play');
+            mobilePlayPanel.classList.toggle('is-active', mode === 'play');
+            if (mode === 'menu') {
+                hideSupportBubble();
+            }
+            resizeCanvas();
+        }
+
+        function hideSupportBubble() {
+            supportBubbleTimer = 0;
+            mobileSupportBubble.classList.remove('is-visible');
+        }
+
+        function showSupportBubble(milestone) {
+            const message = SUPPORT_MESSAGES_BY_DISTANCE[milestone];
+            if (!message) return;
+            mobileSupportText.textContent = message;
+            mobileSupportImage.src = `${IMAGE_SOURCES[(milestone / 50) % 2 === 0 ? 'grandkids' : 'grandkidsWave']}?v=${ASSET_VERSION}`;
+            mobileSupportBubble.classList.add('is-visible');
+            supportBubbleTimer = 240;
+        }
+
+        function updateSupportBubble() {
+            if (currentState !== GAME_STATE.PLAYING) {
+                hideSupportBubble();
+                return;
+            }
+
+            const milestone = Math.floor(gameDistance / 50) * 50;
+            if (SUPPORT_MESSAGES_BY_DISTANCE[milestone] && milestone !== lastSupportMilestone) {
+                lastSupportMilestone = milestone;
+                showSupportBubble(milestone);
+            }
+
+            if (supportBubbleTimer > 0) {
+                supportBubbleTimer--;
+                if (supportBubbleTimer <= 0) {
+                    mobileSupportBubble.classList.remove('is-visible');
+                }
+            }
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // --- STREAMING_CHUNK: Game State Variables ---
+        // ゲーム状態
+        const GAME_STATE = {
+            START: 'START',
+            COUNTDOWN: 'COUNTDOWN',
+            PLAYING: 'PLAYING',
+            CLEARING: 'CLEARING', // ゴール一軒家への移動アニメ
+            GAMEOVER: 'GAMEOVER',
+            CLEAR: 'CLEAR'
+        };
+        let currentState = GAME_STATE.START;
+
+        const TARGET_DISTANCE = 848; // 総目標走行距離 km
+        const GRAVITY = 0.6;
+        const JUMP_FORCE = -11;
+        const BASE_SPEED = 5;
+
+        // タイマー系
+        let countdownVal = 3;
+        let countdownTimer = 0;
+        let clearSequenceTimer = 0;
+
+        // エリアの「後半」かどうかを判定する関数
+        // 各エリア(25%刻み)の中で、後半(50%以降)に入っているか判定
+        function isAreaLatterHalf() {
+            const ratio = gameDistance / TARGET_DISTANCE;
+            const section = Math.floor(ratio * 4); // 0, 1, 2, 3
+            const sectionProgress = (ratio * 4) - section; // 0.0 ~ 1.0
+            return sectionProgress >= 0.5 && ratio < 1.0;
+        }
+
+        // --- 差し替え画像設定 ---
+        // 画像を使う場合は、HTMLと同じフォルダの images/ に画像を置き、相対パスを入れる。
+        // 未設定または読み込み失敗時は、既存のCanvas描画に自動で戻る。
+        const IMAGE_SOURCES = {
+            fujitaShop: 'images/藤田建具店.png',
+            player: 'images/bike-jiiji.png',
+            playerJump: 'images/bike-jiiji-jump.png',
+            boar: 'images/イノシシ.png',
+            boarRun: 'images/イノシシ2.png',
+            house: 'images/一軒家.png',
+            grandkids: 'images/こどもたち.png',
+            grandkidsWave: 'images/こどもたち2.png',
+            stage1: 'images/ステージ1.png',
+            stage2: 'images/ステージ2.png',
+            stage3: 'images/ステージ3.png',
+            stage4: 'images/ステージ4.png'
+        };
+        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1550';
+        const ASSET_VERSION = BUILD_VERSION;
+        const CHROMA_KEY_IMAGES = new Set(['player', 'playerJump', 'boar', 'boarRun', 'house', 'grandkids', 'grandkidsWave']);
+        console.info(`じいじのバイク旅 build: ${BUILD_VERSION}`);
+
+        const gameImages = {};
+
+        function setupGameImages() {
+            Object.entries(IMAGE_SOURCES).forEach(([key, src]) => {
+                if (!src) return;
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        if (CHROMA_KEY_IMAGES.has(key)) {
+                            img.renderSource = createTransparentBackgroundImage(img);
+                        }
+                    } catch (error) {
+                        console.warn(`画像の透過処理をスキップ: ${key}`, error);
+                    }
+                    img.ready = true;
+                };
+                img.onerror = () => {
+                    console.warn(`画像を読み込めません: ${key} -> ${src}`);
+                    img.ready = false;
+                };
+                img.src = `${src}?v=${ASSET_VERSION}`;
+                gameImages[key] = img;
+            });
+        }
+
+        function hasGameImage(key) {
+            return Boolean(gameImages[key] && gameImages[key].ready);
+        }
+
+        function drawImageFit(img, x, y, width, height) {
+            const source = img.renderSource || img;
+            const sourceWidth = img.naturalWidth || source.width;
+            const sourceHeight = img.naturalHeight || source.height;
+            const imageRatio = sourceWidth / sourceHeight;
+            const boxRatio = width / height;
+            let drawWidth = width;
+            let drawHeight = height;
+            if (imageRatio > boxRatio) {
+                drawHeight = width / imageRatio;
+            } else {
+                drawWidth = height * imageRatio;
+            }
+            ctx.drawImage(source, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight);
+        }
+
+        function drawImageCover(img, x, y, width, height, options = {}) {
+            const source = img.renderSource || img;
+            const sourceWidth = img.naturalWidth || source.width;
+            const sourceHeight = img.naturalHeight || source.height;
+            const imageRatio = sourceWidth / sourceHeight;
+            const boxRatio = width / height;
+            let drawWidth = width;
+            let drawHeight = height;
+            if (imageRatio > boxRatio) {
+                drawHeight = height;
+                drawWidth = height * imageRatio;
+            } else {
+                drawWidth = width;
+                drawHeight = width / imageRatio;
+            }
+
+            const zoom = options.zoom || 1;
+            drawWidth *= zoom;
+            drawHeight *= zoom;
+
+            const overflowX = Math.max(0, drawWidth - width);
+            const overflowY = Math.max(0, drawHeight - height);
+            const panX = Math.min(1, Math.max(-1, options.panX || 0));
+            const panY = Math.min(1, Math.max(-1, options.panY || 0));
+            const drawX = x + (width - drawWidth) / 2 + (overflowX / 2) * panX;
+            const drawY = y + (height - drawHeight) / 2 + (overflowY / 2) * panY;
+
+            ctx.drawImage(source, drawX, drawY, drawWidth, drawHeight);
+        }
+
+        function createTransparentBackgroundImage(img) {
+            const offscreen = document.createElement('canvas');
+            offscreen.width = img.naturalWidth;
+            offscreen.height = img.naturalHeight;
+            const offscreenCtx = offscreen.getContext('2d');
+            offscreenCtx.drawImage(img, 0, 0);
+
+            const imageData = offscreenCtx.getImageData(0, 0, offscreen.width, offscreen.height);
+            const data = imageData.data;
+            const samplePoints = [
+                0,
+                (offscreen.width - 1) * 4,
+                ((offscreen.height - 1) * offscreen.width) * 4,
+                (((offscreen.height - 1) * offscreen.width) + offscreen.width - 1) * 4,
+                Math.floor(offscreen.width / 2) * 4,
+                (Math.floor(offscreen.height / 2) * offscreen.width) * 4
+            ];
+            const backgroundSamples = samplePoints
+                .filter(index => data[index + 3] > 220)
+                .map(index => [data[index], data[index + 1], data[index + 2]]);
+            const backgroundColor = backgroundSamples.length
+                ? backgroundSamples.reduce((sum, color) => [
+                    sum[0] + color[0],
+                    sum[1] + color[1],
+                    sum[2] + color[2]
+                ], [0, 0, 0]).map(value => value / backgroundSamples.length)
+                : [255, 255, 255];
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                const colorDistance = Math.hypot(
+                    r - backgroundColor[0],
+                    g - backgroundColor[1],
+                    b - backgroundColor[2]
+                );
+                const isNearBackground = colorDistance < 38 && min > 210;
+                const isNearWhite = r > 220 && g > 220 && b > 220 && (max - min) < 32;
+                const isSoftBackground = r > 245 && g > 245 && b > 245;
+
+                if (isNearBackground || isNearWhite || isSoftBackground) {
+                    data[i + 3] = 0;
+                }
+            }
+            offscreenCtx.putImageData(imageData, 0, 0);
+            return trimTransparentCanvas(offscreen);
+        }
+
+        function trimTransparentCanvas(sourceCanvas) {
+            const sourceCtx = sourceCanvas.getContext('2d');
+            const imageData = sourceCtx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+            const data = imageData.data;
+            let minX = sourceCanvas.width;
+            let minY = sourceCanvas.height;
+            let maxX = 0;
+            let maxY = 0;
+
+            for (let y = 0; y < sourceCanvas.height; y++) {
+                for (let x = 0; x < sourceCanvas.width; x++) {
+                    const alpha = data[((y * sourceCanvas.width) + x) * 4 + 3];
+                    if (alpha > 12) {
+                        minX = Math.min(minX, x);
+                        minY = Math.min(minY, y);
+                        maxX = Math.max(maxX, x);
+                        maxY = Math.max(maxY, y);
+                    }
+                }
+            }
+
+            if (minX > maxX || minY > maxY) {
+                return sourceCanvas;
+            }
+
+            const padding = 2;
+            minX = Math.max(0, minX - padding);
+            minY = Math.max(0, minY - padding);
+            maxX = Math.min(sourceCanvas.width - 1, maxX + padding);
+            maxY = Math.min(sourceCanvas.height - 1, maxY + padding);
+
+            const trimmedCanvas = document.createElement('canvas');
+            trimmedCanvas.width = maxX - minX + 1;
+            trimmedCanvas.height = maxY - minY + 1;
+            trimmedCanvas.getContext('2d').drawImage(
+                sourceCanvas,
+                minX,
+                minY,
+                trimmedCanvas.width,
+                trimmedCanvas.height,
+                0,
+                0,
+                trimmedCanvas.width,
+                trimmedCanvas.height
+            );
+            return trimmedCanvas;
+        }
+
+        function formatLives(lives, maxLives) {
+            return '♥'.repeat(lives) + '♡'.repeat(maxLives - lives);
+        }
+
+        setupGameImages();
+
+        // --- STREAMING_CHUNK: Player Class Definition ---
+        // プレイヤークラス
+        class Player {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = 100;
+                this.y = canvas.height - 100;
+                this.width = 60;
+                this.height = 60;
+                this.vy = 0;
+                this.isGrounded = false;
+                this.jumpCount = 0;
+                this.maxJumps = 2;
+                this.lives = 3;
+                this.maxLives = 3;
+                this.invincibleTimer = 0;
+                this.angle = 0;
+                this.wheelRotation = 0;
+            }
+
+            jump() {
+                if (this.jumpCount < this.maxJumps) {
+                    this.vy = JUMP_FORCE;
+                    this.jumpCount++;
+                    this.isGrounded = false;
+                    sound.playJump();
+                    this.angle = -0.15;
+                }
+            }
+
+            damage() {
+                if (this.invincibleTimer <= 0) {
+                    this.lives--;
+                    this.invincibleTimer = 90; // 約1.5秒
+                    sound.playDamage();
+                    this.angle = 0.2;
+                    if (this.lives <= 0) {
+                        endGame(false);
+                    }
+                }
+            }
+
+            heal() {
+                if (this.lives < this.maxLives) {
+                    this.lives++;
+                    sound.playHeal();
+                    createParticles(this.x + this.width / 2, this.y + this.height / 2, '#4ade80', 10);
+                } else {
+                    sound.playHeal();
+                    createParticles(this.x + this.width / 2, this.y + this.height / 2, '#fbbf24', 5);
+                }
+            }
+
+            update() {
+                this.vy += GRAVITY;
+                this.y += this.vy;
+
+                const groundY = canvas.height - 85;
+                if (this.y + this.height > groundY) {
+                    this.y = groundY - this.height;
+                    this.vy = 0;
+                    this.isGrounded = true;
+                    this.jumpCount = 0;
+                    
+                    if (currentState === GAME_STATE.COUNTDOWN) {
+                        // カウントダウン中はアイドリングでブルブル震える
+                        this.angle = Math.sin(Date.now() / 20) * 0.04;
+                    } else {
+                        this.angle = Math.sin(Date.now() / 40) * 0.02;
+                    }
+                } else {
+                    this.angle += 0.005;
+                    if (this.angle > 0.1) this.angle = 0.1;
+                }
+
+                if (this.invincibleTimer > 0) {
+                    this.invincibleTimer--;
+                }
+
+                if (currentState !== GAME_STATE.COUNTDOWN && currentState !== GAME_STATE.CLEAR) {
+                    this.wheelRotation += (gameSpeed * 0.03);
+                }
+            }
+
+            draw() {
+                if (this.invincibleTimer > 0 && Math.floor(this.invincibleTimer / 4) % 2 === 0) {
+                    return; // 点滅
+                }
+
+                ctx.save();
+                ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                ctx.rotate(this.angle);
+
+                const playerImageKey = (!this.isGrounded && hasGameImage('playerJump')) ? 'playerJump' : 'player';
+                if (hasGameImage(playerImageKey)) {
+                    drawImageFit(gameImages[playerImageKey], -46, -45, 92, 84);
+                    ctx.restore();
+                    return;
+                }
+
+                // --- じいじバイクの自作SVG/ベクター描画 ---
+                ctx.fillStyle = '#ef4444'; // 赤いバイク
+                ctx.beginPath();
+                ctx.roundRect(-25, 0, 50, 15, 5);
+                ctx.fill();
+                
+                ctx.fillStyle = '#f8fafc'; // レッグシールド
+                ctx.beginPath();
+                ctx.moveTo(-10, -10);
+                ctx.lineTo(5, -15);
+                ctx.lineTo(15, 5);
+                ctx.lineTo(-5, 10);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.strokeStyle = '#94a3b8'; // ハンドル
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(10, -5);
+                ctx.lineTo(15, -28);
+                ctx.stroke();
+
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(15, -28, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#f97316'; // みkan箱
+                ctx.fillRect(-28, -20, 20, 15);
+                ctx.strokeStyle = '#ea580c';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-28, -20, 20, 15);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(-24, -13); ctx.lineTo(-12, -13);
+                ctx.moveTo(-22, -8); ctx.lineTo(-14, -8);
+                ctx.stroke();
+
+                this.drawWheel(-20, 15);
+                this.drawWheel(20, 15);
+
+                // --- じいじキャラクター描画 ---
+                ctx.fillStyle = '#16a34a'; // ちゃんちゃんこ
+                ctx.beginPath();
+                ctx.ellipse(-5, -12, 10, 15, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#fbcfe8'; // 顔
+                ctx.beginPath();
+                ctx.arc(-2, -32, 10, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#f1f5f9'; // 白髪
+                ctx.beginPath();
+                ctx.arc(-9, -32, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath(); // ひげ
+                ctx.arc(3, -28, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#fff'; // まゆげ
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-2, -36);
+                ctx.lineTo(4, -36);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#000'; // 目
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(1, -31);
+                ctx.lineTo(5, -31);
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff'; // ヘルメット
+                ctx.beginPath();
+                ctx.arc(-2, -36, 11, Math.PI, 0);
+                ctx.fill();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(-9, -34);
+                ctx.lineTo(-2, -24);
+                ctx.lineTo(5, -34);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            drawWheel(offsetX, offsetY) {
+                ctx.save();
+                ctx.translate(offsetX, offsetY);
+                ctx.rotate(this.wheelRotation);
+
+                ctx.fillStyle = '#1e293b'; // タイヤ
+                ctx.beginPath();
+                ctx.arc(0, 0, 12, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#e2e8f0'; // ホイール
+                ctx.beginPath();
+                ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#64748b'; // スポーク
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(Math.cos((i * Math.PI) / 3) * 8, Math.sin((i * Math.PI) / 3) * 8);
+                }
+                ctx.stroke();
+
+                ctx.restore();
+            }
+        }
+
+        // --- STREAMING_CHUNK: Obstacle Class Definition ---
+        // 障害物クラス
+        class Obstacle {
+            constructor(x, type) {
+                this.x = x;
+                this.type = type; // 'CONE', 'BOAR', 'STONE', 'BIRD', 'TALL_BARRIER'
+                this.speedModifier = 1.0;
+                this.wingY = 0; // 鳥の羽ばたき用
+
+                switch (type) {
+                    case 'CONE':
+                        this.width = 32;
+                        this.height = 40;
+                        this.y = canvas.height - 85 - this.height;
+                        break;
+                    case 'TALL_BARRIER':
+                        this.width = 42;
+                        this.height = 118;
+                        this.y = canvas.height - 85 - this.height;
+                        break;
+                    case 'BOAR':
+                        this.width = 58;
+                        this.height = 42;
+                        this.y = canvas.height - 85 - this.height;
+                        this.speedModifier = 1.4;
+                        break;
+                    case 'STONE':
+                        this.width = 50;
+                        this.height = 35;
+                        this.y = canvas.height - 85 - this.height;
+                        break;
+                    case 'BIRD': // 1段ジャンプだとぶつかり、2段ジャンプでないと飛び越えられない空中カラス
+                        this.width = 40;
+                        this.height = 25;
+                        // 通常ジャンプの頭の高さに配置
+                        this.y = canvas.height - 85 - 65; 
+                        this.speedModifier = 1.6; // 速く飛んでくる
+                        break;
+                }
+            }
+
+            update(gameSpeed) {
+                this.x -= gameSpeed * this.speedModifier;
+                if (this.type === 'BIRD') {
+                    this.wingY = Math.sin(Date.now() * 0.02) * 8; // 羽ばたき
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                if (this.type === 'CONE') {
+                    this.drawSingleCone(0, 0);
+                } else if (this.type === 'TALL_BARRIER') {
+                    this.drawTallBarrier();
+                } else if (this.type === 'BOAR') {
+                    const boarImageKey = (Math.floor(Date.now() / 120) % 2 === 0 && hasGameImage('boarRun')) ? 'boarRun' : 'boar';
+                    if (hasGameImage(boarImageKey)) {
+                        drawImageFit(gameImages[boarImageKey], -7, -4, this.width + 14, this.height + 8);
+                        ctx.restore();
+                        return;
+                    }
+
+                    // イノシシ
+                    ctx.fillStyle = '#78350f';
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, this.width, this.height, 8);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff'; // キバ
+                    ctx.beginPath();
+                    ctx.moveTo(0, this.height - 15);
+                    ctx.lineTo(-6, this.height - 20);
+                    ctx.lineTo(-2, this.height - 10);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = '#000'; // 鼻
+                    ctx.fillRect(-2, this.height - 15, 6, 8);
+                    ctx.fillStyle = '#ef4444'; // 怒り目
+                    ctx.beginPath();
+                    ctx.arc(8, 10, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 4;
+                    const legOffset = Math.sin(Date.now() / 50) * 8;
+                    ctx.beginPath();
+                    ctx.moveTo(10, this.height);
+                    ctx.lineTo(10 + legOffset, this.height + 6);
+                    ctx.moveTo(this.width - 10, this.height);
+                    ctx.lineTo(this.width - 10 - legOffset, this.height + 6);
+                    ctx.stroke();
+                } else if (this.type === 'STONE') {
+                    // 石
+                    ctx.fillStyle = '#64748b';
+                    ctx.beginPath();
+                    ctx.moveTo(10, 0);
+                    ctx.lineTo(this.width - 5, 5);
+                    ctx.lineTo(this.width, this.height);
+                    ctx.lineTo(0, this.height);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (this.type === 'BIRD') {
+                    // 凶悪なカラス
+                    ctx.fillStyle = '#1e293b'; // 黒っぽい体
+                    ctx.beginPath();
+                    ctx.ellipse(this.width / 2, this.height / 2, 15, 8, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    // くちばし（黄）
+                    ctx.fillStyle = '#eab308';
+                    ctx.beginPath();
+                    ctx.moveTo(0, this.height / 2 - 3);
+                    ctx.lineTo(-10, this.height / 2);
+                    ctx.lineTo(0, this.height / 2 + 3);
+                    ctx.closePath();
+                    ctx.fill();
+                    // 目
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(8, this.height / 2 - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ef4444';
+                    ctx.beginPath();
+                    ctx.arc(8, this.height / 2 - 2, 1, 0, Math.PI * 2);
+                    ctx.fill();
+                    // 羽ばたく羽
+                    ctx.fillStyle = '#0f172a';
+                    ctx.beginPath();
+                    ctx.moveTo(this.width / 2 - 5, this.height / 2);
+                    ctx.lineTo(this.width / 2 + 5, this.height / 2 - 15 + this.wingY);
+                    ctx.lineTo(this.width / 2 + 10, this.height / 2);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+
+            drawSingleCone(offsetX, offsetY) {
+                ctx.save();
+                ctx.translate(offsetX, offsetY);
+                // コーン本体
+                ctx.fillStyle = '#f97316';
+                ctx.beginPath();
+                ctx.moveTo(16, 0);
+                ctx.lineTo(0, 40);
+                ctx.lineTo(32, 40);
+                ctx.closePath();
+                ctx.fill();
+                // 白い反射ライン
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.moveTo(12, 15);
+                ctx.lineTo(20, 15);
+                ctx.lineTo(23, 25);
+                ctx.lineTo(9, 25);
+                ctx.closePath();
+                ctx.fill();
+                // 台座
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(-2, 34, 36, 6);
+                ctx.restore();
+            }
+
+            drawTallBarrier() {
+                ctx.fillStyle = '#1f2937';
+                ctx.fillRect(0, 0, this.width, this.height);
+
+                ctx.fillStyle = '#facc15';
+                ctx.fillRect(5, 8, this.width - 10, this.height - 16);
+
+                ctx.strokeStyle = '#111827';
+                ctx.lineWidth = 5;
+                ctx.strokeRect(0, 0, this.width, this.height);
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(5, 8, this.width - 10, this.height - 16);
+                ctx.clip();
+                ctx.strokeStyle = '#111827';
+                ctx.lineWidth = 8;
+                for (let y = -this.height; y < this.height; y += 24) {
+                    ctx.beginPath();
+                    ctx.moveTo(-8, y);
+                    ctx.lineTo(this.width + 8, y + this.width);
+                    ctx.stroke();
+                }
+                ctx.restore();
+
+                ctx.fillStyle = '#111827';
+                ctx.fillRect(7, this.height - 18, this.width - 14, 10);
+            }
+
+            getCollisionRect() {
+                // 当たり判定
+                return {
+                    x: this.x + 3,
+                    y: this.y + 3,
+                    width: this.width - 6,
+                    height: this.height - 4
+                };
+            }
+        }
+
+        // --- STREAMING_CHUNK: Item Class Definition ---
+        // アイテムクラス
+        class Item {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'MIKAN', 'TEA', 'RICE'
+                this.width = 30;
+                this.height = 30;
+                this.pulseTimer = Math.random() * 10;
+            }
+
+            update(gameSpeed) {
+                this.x -= gameSpeed;
+                this.pulseTimer += 0.05;
+            }
+
+            draw() {
+                ctx.save();
+                const hoverOffset = Math.sin(this.pulseTimer) * 5;
+                ctx.translate(this.x + this.width / 2, this.y + this.height / 2 + hoverOffset);
+
+                ctx.fillStyle = 'rgba(253, 224, 71, 0.2)';
+                ctx.beginPath();
+                ctx.arc(0, 0, 20 + Math.sin(this.pulseTimer) * 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (this.type === 'MIKAN') {
+                    ctx.fillStyle = '#f97316';
+                    ctx.beginPath();
+                    ctx.arc(0, 2, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#22c55e'; // 葉っぱ
+                    ctx.beginPath();
+                    ctx.ellipse(3, -10, 4, 7, Math.PI / 4, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.type === 'TEA') {
+                    ctx.fillStyle = '#cbd5e1';
+                    ctx.beginPath();
+                    ctx.roundRect(-8, -6, 16, 18, 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#22c55e';
+                    ctx.fillRect(-6, -5, 12, 4);
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(-3, -10 + Math.sin(this.pulseTimer) * 2);
+                    ctx.quadraticCurveTo(0, -12, -3, -15);
+                    ctx.stroke();
+                } else if (this.type === 'RICE') {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.moveTo(0, -12);
+                    ctx.lineTo(13, 10);
+                    ctx.lineTo(-13, 10);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(-5, 2, 10, 8);
+                }
+
+                ctx.restore();
+            }
+
+            getCollisionRect() {
+                return {
+                    x: this.x,
+                    y: this.y,
+                    width: this.width,
+                    height: this.height
+                };
+            }
+        }
+
+        // --- STREAMING_CHUNK: Particle and Setup ---
+        // パーティクルクラス
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = Math.random() * 4 + 2;
+                this.vx = (Math.random() - 0.5) * 6 - 2;
+                this.vy = (Math.random() - 0.5) * 6;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.05 + 0.02;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        let obstacles = [];
+        let items = [];
+        let particles = [];
+        let player = null;
+        
+        let gameDistance = 0; 
+        let gameSpeed = 0; // 開始時は0、カウントダウン後に走り出す
+        
+        let obstacleSpawnTimer = 0;
+        let itemSpawnTimer = 0;
+
+        let bgSkyScroll = 0;
+        let bgMidScroll = 0;
+        let bgGroundScroll = 0;
+
+        // ゴール演出用の位置管理
+        let goalHouseX = -999;
+        let grandchildrenJumpTimer = 0;
+        let lastSupportMilestone = 0;
+        let supportBubbleTimer = 0;
+        const SUPPORT_MESSAGES_BY_DISTANCE = {
+            50: 'じいじ、出発したね！気をつけて来てね！',
+            100: 'もう100km！じいじのバイク、かっこいい！',
+            150: 'その調子！でも休憩もしてね！',
+            200: 'そろそろおなかすいてない？みかん食べてね！',
+            250: '関西まで来た？じいじ、すごい！',
+            300: '遠くまで走ってるね！みんなで応援してるよ！',
+            350: '風に負けないで、じいじ！',
+            400: '半分近くまで来たね！あと少しずつだよ！',
+            450: '富士山見えた？写真撮ってきてね！',
+            500: '500km突破！じいじ、ほんとにすごい！',
+            550: '暗くなってきたかな？安全運転でね！',
+            600: 'もう少しでこっち側だよ！待ってるよ！',
+            650: 'じいじ、疲れてない？無理しないでね！',
+            700: 'あとちょっと！みんなで玄関で待ってるよ！',
+            750: '鎌倉まであと少し！がんばれー！',
+            800: 'じいじの音が聞こえてきそう！'
+        };
+
+        function checkCollision(a, b) {
+            return (
+                a.x < b.x + b.width &&
+                a.x + a.width > b.x &&
+                a.y < b.y + b.height &&
+                a.y + a.height > b.y
+            );
+        }
+
+        function createParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function getCurrentArea() {
+            const ratio = gameDistance / TARGET_DISTANCE;
+            if (ratio < 0.25) {
+                return { name: 'しまなみ海道・愛媛エリア', key: 'ehime', stageImage: 'stage1' };
+            } else if (ratio < 0.5) {
+                return { name: 'なにわの街・関西エリア', key: 'kansai', stageImage: 'stage2' };
+            } else if (ratio < 0.75) {
+                return { name: '駿河湾・富士山エリア', key: 'fuji', stageImage: 'stage3' };
+            } else {
+                return { name: '湘南・鎌倉エリア', key: 'kamakura', stageImage: 'stage4' };
+            }
+        }
+
+        function getCurrentAreaProgress() {
+            const ratio = Math.min(0.999, Math.max(0, gameDistance / TARGET_DISTANCE));
+            return (ratio * 4) - Math.floor(ratio * 4);
+        }
+
+        function applyEveningGrade() {
+            const progress = Math.min(1, Math.max(0, gameDistance / TARGET_DISTANCE));
+            const bgHeight = canvas.height - 85;
+
+            ctx.save();
+            ctx.globalCompositeOperation = 'multiply';
+            ctx.fillStyle = `rgba(255, 150, 82, ${0.06 + progress * 0.22})`;
+            ctx.fillRect(0, 0, canvas.width, bgHeight);
+            ctx.globalCompositeOperation = 'source-over';
+
+            const duskGrad = ctx.createLinearGradient(0, 0, 0, bgHeight);
+            duskGrad.addColorStop(0, `rgba(245, 118, 74, ${progress * 0.18})`);
+            duskGrad.addColorStop(0.55, `rgba(255, 183, 92, ${progress * 0.09})`);
+            duskGrad.addColorStop(1, `rgba(54, 35, 88, ${progress * 0.16})`);
+            ctx.fillStyle = duskGrad;
+            ctx.fillRect(0, 0, canvas.width, bgHeight);
+            ctx.restore();
+        }
+
+        // --- STREAMING_CHUNK: Background Drawing System ---
+        // 背景とスタート地点・ゴール地点の描画
+        function drawBackground() {
+            const area = getCurrentArea();
+            const bgHeight = canvas.height - 85;
+
+            if (hasGameImage(area.stageImage)) {
+                const stageProgress = getCurrentAreaProgress();
+                const backgroundPan = 0.45 - (stageProgress * 0.9);
+                drawImageCover(gameImages[area.stageImage], 0, 0, canvas.width, bgHeight, {
+                    zoom: 1.14,
+                    panX: backgroundPan,
+                    panY: -0.04
+                });
+                applyEveningGrade();
+            } else {
+            
+                // 1. 空のグラデーション
+                let skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                if (area.key === 'ehime') {
+                    skyGrad.addColorStop(0, '#7dd3fc');
+                    skyGrad.addColorStop(1, '#bae6fd');
+                } else if (area.key === 'kansai') {
+                    skyGrad.addColorStop(0, '#fdba74');
+                    skyGrad.addColorStop(1, '#ffedd5');
+                } else if (area.key === 'fuji') {
+                    skyGrad.addColorStop(0, '#60a5fa');
+                    skyGrad.addColorStop(1, '#dbeafe');
+                } else {
+                    skyGrad.addColorStop(0, '#f472b6');
+                    skyGrad.addColorStop(1, '#fee2e2');
+                }
+                ctx.fillStyle = skyGrad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 2. 遠景スクロール
+                bgSkyScroll -= gameSpeed * 0.05;
+                if (bgSkyScroll <= -canvas.width) bgSkyScroll = 0;
+
+                ctx.save();
+                ctx.translate(bgSkyScroll, 0);
+                for (let i = 0; i < 2; i++) {
+                    const xOffset = i * canvas.width;
+                    if (area.key === 'ehime') {
+                        // しまなみ大橋
+                        ctx.fillStyle = 'rgba(100, 116, 139, 0.3)';
+                        ctx.beginPath();
+                        ctx.moveTo(xOffset + 50, canvas.height - 120);
+                        ctx.lineTo(xOffset + 50, canvas.height - 250);
+                        ctx.lineTo(xOffset + 70, canvas.height - 250);
+                        ctx.lineTo(xOffset + 120, canvas.height - 120);
+                        ctx.moveTo(xOffset + 300, canvas.height - 120);
+                        ctx.lineTo(xOffset + 350, canvas.height - 250);
+                        ctx.lineTo(xOffset + 370, canvas.height - 250);
+                        ctx.lineTo(xOffset + 370, canvas.height - 120);
+                        ctx.fill();
+                        ctx.strokeStyle = 'rgba(100, 116, 139, 0.4)';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.moveTo(xOffset + 50, canvas.height - 240);
+                        ctx.quadraticCurveTo(xOffset + 200, canvas.height - 150, xOffset + 350, canvas.height - 240);
+                        ctx.stroke();
+                    } else if (area.key === 'kansai') {
+                        ctx.fillStyle = 'rgba(120, 113, 108, 0.3)';
+                        ctx.fillRect(xOffset + 20, canvas.height - 220, 60, 140);
+                        ctx.fillRect(xOffset + 100, canvas.height - 260, 80, 180);
+                        ctx.fillRect(xOffset + 220, canvas.height - 190, 50, 110);
+                    } else if (area.key === 'fuji') {
+                        // 富士山
+                        ctx.fillStyle = 'rgba(59, 130, 246, 0.25)';
+                        ctx.beginPath();
+                        ctx.moveTo(xOffset + 50, canvas.height - 85);
+                        ctx.lineTo(xOffset + 200, canvas.height - 270);
+                        ctx.lineTo(xOffset + 240, canvas.height - 270);
+                        ctx.lineTo(xOffset + 390, canvas.height - 85);
+                        ctx.closePath();
+                        ctx.fill();
+                    } else {
+                        ctx.fillStyle = 'rgba(109, 40, 217, 0.15)';
+                        ctx.fillRect(xOffset, canvas.height - 120, canvas.width, 35);
+                    }
+                }
+                ctx.restore();
+
+                // 3. 中景スクロール
+                bgMidScroll -= gameSpeed * 0.2;
+                if (bgMidScroll <= -canvas.width) bgMidScroll = 0;
+
+                ctx.save();
+                ctx.translate(bgMidScroll, 0);
+                for (let i = 0; i < 2; i++) {
+                    const xOffset = i * canvas.width;
+                    if (area.key === 'ehime') {
+                        ctx.fillStyle = '#38bdf8';
+                        ctx.fillRect(xOffset, canvas.height - 100, canvas.width, 15);
+                        ctx.fillStyle = '#0284c7';
+                        ctx.beginPath();
+                        ctx.ellipse(xOffset + 150, canvas.height - 95, 60, 20, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (area.key === 'kansai') {
+                        ctx.fillStyle = 'rgba(115, 115, 115, 0.4)';
+                        ctx.fillRect(xOffset + 120, canvas.height - 180, 20, 100);
+                    } else if (area.key === 'fuji') {
+                        ctx.fillStyle = '#15803d';
+                        ctx.beginPath();
+                        ctx.arc(xOffset + 100, canvas.height - 40, 120, Math.PI, 0);
+                        ctx.fill();
+                    } else {
+                        ctx.fillStyle = '#16a34a';
+                        ctx.beginPath();
+                        ctx.arc(xOffset + 100, canvas.height - 110, 25, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                ctx.restore();
+                applyEveningGrade();
+            }
+
+            // --- STREAMING_CHUNK: Start & Goal Graphics Drawing ---
+            // 4. 【スタート地点演出】背景に「藤田建具店」を描画 (0〜15km付近の間スクロール)
+            const fujitaX = 100 - (gameDistance * 100);
+            if (fujitaX > -300) {
+                drawFujitaShop(fujitaX, canvas.height - 85);
+            }
+
+            // 5. 【ゴール地点演出】背景に「孫たちの家」とお孫さんたちを描画
+            const remainingDist = TARGET_DISTANCE - gameDistance;
+            if (remainingDist < 10) { // ゴール直前 (10km未満)
+                const goalProgress = Math.min(1, Math.max(0, (10 - remainingDist) / 10));
+                const houseStartX = canvas.width + 120;
+                const houseStopX = player ? player.x + player.width + 95 : canvas.width * 0.42;
+                goalHouseX = houseStartX + ((houseStopX - houseStartX) * goalProgress);
+                drawGrandkidsHouse(goalHouseX, canvas.height - 85);
+            }
+
+            // 6. 近景：道路アスファルト
+            bgGroundScroll -= gameSpeed;
+            if (bgGroundScroll <= -40) bgGroundScroll = 0;
+
+            ctx.fillStyle = '#4b5563';
+            ctx.fillRect(0, canvas.height - 85, canvas.width, 85);
+
+            // センターライン
+            ctx.fillStyle = '#ffffff';
+            for (let x = bgGroundScroll; x < canvas.width; x += 40) {
+                ctx.fillRect(x, canvas.height - 45, 20, 5);
+            }
+
+            // 路肩縁石
+            ctx.fillStyle = '#6b7280';
+            ctx.fillRect(0, canvas.height - 85, canvas.width, 4);
+        }
+
+        // --- STREAMING_CHUNK: Fujita Shop & House Drawing ---
+        // 「藤田建具店」の店舗ベクター描画
+        function drawFujitaShop(x, groundY) {
+            ctx.save();
+            ctx.translate(x, groundY - 100);
+
+            if (hasGameImage('fujitaShop')) {
+                drawImageFit(gameImages.fujitaShop, -10, -12, 180, 130);
+                ctx.restore();
+                return;
+            }
+
+            // 木造の土台・壁
+            ctx.fillStyle = '#7c2d12'; // 渋い焦茶
+            ctx.fillRect(0, 0, 160, 100);
+            
+            // 和風瓦の屋根
+            ctx.fillStyle = '#475569';
+            ctx.beginPath();
+            ctx.moveTo(-10, 0);
+            ctx.lineTo(80, -25);
+            ctx.lineTo(170, 0);
+            ctx.lineTo(160, 8);
+            ctx.lineTo(80, -15);
+            ctx.lineTo(0, 8);
+            ctx.closePath();
+            ctx.fill();
+
+            // 格子戸（建具）
+            ctx.fillStyle = '#fed7aa'; // 明るい障子紙の色
+            ctx.fillRect(15, 20, 50, 80);
+            ctx.fillRect(85, 20, 50, 80);
+
+            ctx.strokeStyle = '#451a03'; // 格子の線
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i <= 3; i++) {
+                // 縦格子
+                ctx.strokeRect(15 + (i * 12.5), 20, 1, 80);
+                ctx.strokeRect(85 + (i * 12.5), 20, 1, 80);
+            }
+            // 横格子
+            for (let i = 1; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(15, 20 + i * 20); ctx.lineTo(65, 20 + i * 20);
+                ctx.moveTo(85, 20 + i * 20); ctx.lineTo(135, 20 + i * 20);
+                ctx.stroke();
+            }
+
+            // 看板（「藤田建具店」）
+            ctx.fillStyle = '#fffdfa'; // 白い木目調
+            ctx.fillRect(25, -5, 110, 20);
+            ctx.strokeStyle = '#451a03';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(25, -5, 110, 20);
+
+            ctx.fillStyle = '#0f172a'; // 黒文字
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('藤田建具店', 80, 10);
+
+            ctx.restore();
+        }
+
+        // 「孫たちの家」とお孫さんたちのベクター描画
+        function drawGrandkidsHouse(x, groundY) {
+            ctx.save();
+            ctx.translate(x, groundY - 110);
+
+            if (hasGameImage('house')) {
+                drawImageFit(gameImages.house, -15, -35, 160, 145);
+            } else {
+                // 家の壁
+                ctx.fillStyle = '#fef08a'; // クリーム色の一軒家
+                ctx.fillRect(0, 0, 130, 110);
+
+                // 三角屋根
+                ctx.fillStyle = '#ef4444'; // 赤い屋根
+                ctx.beginPath();
+                ctx.moveTo(-15, 0);
+                ctx.lineTo(65, -35);
+                ctx.lineTo(145, 0);
+                ctx.closePath();
+                ctx.fill();
+
+                // ドアと窓
+                ctx.fillStyle = '#b45309'; // 茶色のドア
+                ctx.fillRect(20, 50, 30, 60);
+                ctx.fillStyle = '#38bdf8'; // 青い窓
+                ctx.fillRect(75, 20, 35, 35);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(75, 20, 35, 35);
+
+                // ドアノブ
+                ctx.fillStyle = '#fef08a';
+                ctx.beginPath();
+                ctx.arc(45, 80, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 庭の植木
+                ctx.fillStyle = '#22c55e';
+                ctx.beginPath();
+                ctx.arc(-20, 100, 20, 0, Math.PI * 2);
+                ctx.arc(-40, 100, 15, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // お孫さんたちの配置・アニメーション
+            grandchildrenJumpTimer += 0.1;
+            const girlJump = Math.abs(Math.sin(grandchildrenJumpTimer)) * 12;
+            const boyWave = Math.sin(grandchildrenJumpTimer * 1.5) * 5;
+
+            if (hasGameImage('grandkids')) {
+                const grandkidsImageKey = (Math.floor(Date.now() / 260) % 2 === 0 && hasGameImage('grandkidsWave')) ? 'grandkidsWave' : 'grandkids';
+                const groupJump = Math.abs(Math.sin(grandchildrenJumpTimer)) * 8;
+                drawImageFit(gameImages[grandkidsImageKey], -88, 34 - groupJump, 104, 88);
+
+                if (currentState === GAME_STATE.CLEARING || currentState === GAME_STATE.CLEAR) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.roundRect(-78, 20, 68, 25, 5);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(-34, 45);
+                    ctx.lineTo(-29, 53);
+                    ctx.lineTo(-24, 45);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#0f172a';
+                    ctx.font = 'bold 9px sans-serif';
+                    ctx.fillText('じいじ〜！', -70, 36);
+                }
+
+                ctx.restore();
+                return;
+            }
+
+            // --- 女の子 ---
+            ctx.save();
+            ctx.translate(-50, 110 - girlJump); // ぴょんぴょん跳びはねる
+
+            ctx.fillStyle = '#fbcfe8'; // 顔
+            ctx.beginPath();
+            ctx.arc(0, -32, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#ec4899'; // ピンクの洋服
+            ctx.beginPath();
+            ctx.moveTo(-7, -25);
+            ctx.lineTo(7, -25);
+            ctx.lineTo(10, -10);
+            ctx.lineTo(-10, -10);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#7c2d12'; // 焦茶のお下げ髪
+            ctx.beginPath();
+            ctx.arc(-8, -32, 4, 0, Math.PI * 2); // 左結び目
+            ctx.arc(8, -32, 4, 0, Math.PI * 2); // 右結び目
+            ctx.fill();
+
+            ctx.fillStyle = '#000'; // 目
+            ctx.fillRect(-3, -34, 1.5, 2);
+            ctx.fillRect(1, -34, 1.5, 2);
+
+            ctx.restore();
+
+            // --- 男の子 ---
+            ctx.save();
+            ctx.translate(-25, 110); 
+
+            ctx.fillStyle = '#fbcfe8'; // 顔
+            ctx.beginPath();
+            ctx.arc(0, -32, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#3b82f6'; // 青い洋服
+            ctx.fillRect(-7, -25, 14, 15);
+
+            ctx.fillStyle = '#1e3a8a'; // 帽子
+            ctx.beginPath();
+            ctx.arc(0, -38, 8, Math.PI, 0);
+            ctx.fill();
+            ctx.fillRect(0, -40, 12, 3); // つば
+
+            // 手を振るアニメーション
+            ctx.strokeStyle = '#fbcfe8';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-7, -20);
+            ctx.lineTo(-12, -15); // 左手
+            ctx.moveTo(7, -20);
+            ctx.lineTo(14, -28 + boyWave); // 右手（振る）
+            ctx.stroke();
+
+            ctx.restore();
+
+            // 吹き出し（じいじ〜！）
+            if (currentState === GAME_STATE.CLEARING || currentState === GAME_STATE.CLEAR) {
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.roundRect(-70, 20, 60, 25, 5);
+                ctx.fill();
+                // 吹き出しの三角
+                ctx.beginPath();
+                ctx.moveTo(-30, 45);
+                ctx.lineTo(-25, 53);
+                ctx.lineTo(-20, 45);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#0f172a';
+                ctx.font = 'bold 9px sans-serif';
+                ctx.fillText('じいじ〜！', -62, 36);
+            }
+
+            ctx.restore();
+        }
+
+        // --- STREAMING_CHUNK: Game State Management ---
+        // --- ゲーム開始 ---
+        function startGame() {
+            setGameViewportMode('play');
+            sound.init();
+            sound.setMode(selectedBgmMode);
+            sound.restartBgm();
+            player = new Player();
+            obstacles = [];
+            items = [];
+            particles = [];
+            gameDistance = 0;
+            gameSpeed = 0; // カウントダウン中は進まない
+            obstacleSpawnTimer = 0;
+            itemSpawnTimer = 200;
+            lastSupportMilestone = 0;
+            hideSupportBubble();
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('gameClearScreen').classList.add('hidden');
+            document.getElementById('hud').classList.remove('hidden');
+
+            // 3秒カウントダウンに移行
+            currentState = GAME_STATE.COUNTDOWN;
+            countdownVal = 3;
+            countdownTimer = 60; // 60フレーム＝1秒
+            document.getElementById('countdownScreen').classList.remove('hidden');
+            document.getElementById('countdownText').textContent = countdownVal;
+            sound.playBeep(440, 0.1); // 開始ピッ
+        }
+
+        // --- ゲーム終了 ---
+        function endGame(isClear) {
+            document.getElementById('hud').classList.add('hidden');
+            setGameViewportMode('menu');
+            sound.pauseBgm();
+            if (isClear) {
+                currentState = GAME_STATE.CLEAR;
+                sound.playClear();
+                
+                document.getElementById('clearHearts').textContent = formatLives(player.lives, player.maxLives);
+                document.getElementById('gameClearScreen').classList.remove('hidden');
+            } else {
+                currentState = GAME_STATE.GAMEOVER;
+                sound.playGameOver();
+
+                document.getElementById('overAreaName').textContent = getCurrentArea().name;
+                document.getElementById('overDistance').textContent = Math.floor(gameDistance);
+                document.getElementById('gameOverScreen').classList.remove('hidden');
+            }
+        }
+
+        function returnToTitle() {
+            sound.pauseBgm();
+            setGameViewportMode('menu');
+            currentState = GAME_STATE.START;
+            gameSpeed = 0;
+            clearSequenceTimer = 0;
+            countdownTimer = 0;
+
+            document.getElementById('countdownScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            document.getElementById('gameClearScreen').classList.add('hidden');
+            document.getElementById('hud').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+
+        // --- STREAMING_CHUNK: Main Game Loop ---
+        // --- メインゲームループ ---
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const isLatter = isAreaLatterHalf();
+
+            // --- 1. カウントダウン状態の処理 ---
+            if (currentState === GAME_STATE.COUNTDOWN) {
+                player.update(); // バイクのアイドリングアニメ
+                
+                countdownTimer--;
+                if (countdownTimer <= 0) {
+                    countdownVal--;
+                    if (countdownVal > 0) {
+                        document.getElementById('countdownText').textContent = countdownVal;
+                        sound.playBeep(440, 0.1);
+                        countdownTimer = 60;
+                    } else if (countdownVal === 0) {
+                        document.getElementById('countdownText').textContent = 'GO!';
+                        sound.playBeep(880, 0.2); // 高いGO音
+                        countdownTimer = 45; // 「GO」の表示維持時間
+                    } else {
+                        // カウントダウン完全終了、走行開始！
+                        document.getElementById('countdownScreen').classList.add('hidden');
+                        currentState = GAME_STATE.PLAYING;
+                        gameSpeed = BASE_SPEED;
+                    }
+                }
+            }
+
+            // --- 2. プレイ中状態の処理 ---
+            if (currentState === GAME_STATE.PLAYING) {
+                gameDistance += gameSpeed * 0.012; 
+                
+                // ゴール到達判定
+                if (gameDistance >= TARGET_DISTANCE) {
+                    gameDistance = TARGET_DISTANCE;
+                    currentState = GAME_STATE.CLEARING; // 停車シーケンスへ
+                    clearSequenceTimer = 150; // 停車に150フレームかける
+                }
+
+                // スピード自動増加
+                gameSpeed = BASE_SPEED + (gameDistance / 150);
+
+                // UI更新
+                const progressPercent = (gameDistance / TARGET_DISTANCE) * 100;
+                document.getElementById('progressBar').style.width = `${progressPercent}%`;
+                document.getElementById('progressPin').style.left = `${Math.min(95, Math.max(5, progressPercent))}%`;
+                document.getElementById('currentAreaText').textContent = getCurrentArea().name;
+                document.getElementById('hudDistance').textContent = Math.floor(gameDistance);
+
+                document.getElementById('hudHearts').textContent = formatLives(player.lives, player.maxLives);
+                updateSupportBubble();
+
+                // 障害物出現
+                obstacleSpawnTimer--;
+                if (obstacleSpawnTimer <= 0) {
+                    const types = ['CONE', 'STONE'];
+                    if (gameDistance > 150) types.push('BOAR');
+                    
+                    // 【難易度アップ仕様】エリア後半なら、カラス(BIRD)や背高バリケード(TALL_BARRIER)が出現
+                    if (isLatter) {
+                        types.push('BIRD', 'TALL_BARRIER');
+                    }
+
+                    const chosenType = types[Math.floor(Math.random() * types.length)];
+                    obstacles.push(new Obstacle(canvas.width + 50, chosenType));
+                    
+                    // スピードが上がるほど出現頻度を縮小
+                    obstacleSpawnTimer = Math.max(70, 160 - (gameSpeed * 5.5) + Math.random() * 50);
+                }
+
+                // アイテム出現（出現確率：障害物より圧倒的に低い）
+                itemSpawnTimer--;
+                if (itemSpawnTimer <= 0) {
+                    const x = canvas.width + 50;
+                    const y = canvas.height - 120 - Math.random() * 80;
+                    
+                    const area = getCurrentArea();
+                    let itemType = 'MIKAN';
+                    if (area.key === 'ehime') itemType = 'MIKAN';
+                    else if (area.key === 'fuji') itemType = 'TEA';
+                    else itemType = 'RICE';
+
+                    items.push(new Item(x, y, itemType));
+                    itemSpawnTimer = 650 + Math.random() * 450; // 出現頻度を非常に低く
+                }
+
+                player.update();
+
+                if (Math.random() < 0.3) {
+                    createParticles(player.x - 5, player.y + player.height - 15, 'rgba(255,255,255,0.5)', 1);
+                }
+
+                // コリジョン判定（障害物）
+                const playerRect = { x: player.x, y: player.y, width: player.width, height: player.height };
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    const obs = obstacles[i];
+                    obs.update(gameSpeed);
+
+                    if (checkCollision(playerRect, obs.getCollisionRect())) {
+                        player.damage();
+                        createParticles(obs.x + obs.width / 2, obs.y + obs.height / 2, '#ef4444', 15);
+                        obstacles.splice(i, 1);
+                        continue;
+                    }
+
+                    if (obs.x + obs.width < -50) {
+                        obstacles.splice(i, 1);
+                    }
+                }
+
+                // コリジョン判定（アイテム）
+                for (let i = items.length - 1; i >= 0; i--) {
+                    const item = items[i];
+                    item.update(gameSpeed);
+
+                    if (checkCollision(playerRect, item.getCollisionRect())) {
+                        player.heal();
+                        items.splice(i, 1);
+                        continue;
+                    }
+
+                    if (item.x + item.width < -50) {
+                        items.splice(i, 1);
+                    }
+                }
+
+                // パーティクル
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    particles[i].update();
+                    if (particles[i].life <= 0) {
+                        particles.splice(i, 1);
+                    }
+                }
+            }
+
+            // --- STREAMING_CHUNK: Clearing State Sequence ---
+            // --- 3. ゴール直後の自動停車アニメ処理 ---
+            if (currentState === GAME_STATE.CLEARING) {
+                // バイクを徐々に減速して、お孫さんの前で停車させる
+                gameSpeed *= 0.95;
+                if (gameSpeed < 0.1) {
+                    gameSpeed = 0;
+                }
+
+                // プレイヤーの更新（重力など）
+                player.update();
+
+                // パーティクル（排気ガス）だけ少し出す
+                if (Math.random() < 0.15 && gameSpeed > 0) {
+                    createParticles(player.x - 5, player.y + player.height - 15, 'rgba(255,255,255,0.4)', 1);
+                }
+
+                clearSequenceTimer--;
+                if (clearSequenceTimer <= 0) {
+                    endGame(true); // 完全クリアポップアップへ
+                }
+            }
+
+            // --- 4. 描画フェーズ ---
+            drawBackground();
+
+            // 障害物/アイテム/粒子/プレイヤー描画
+            obstacles.forEach(obs => obs.draw());
+            items.forEach(item => item.draw());
+            particles.forEach(p => p.draw());
+
+            if (player) {
+                player.draw();
+            }
+
+            // タイトル・ゲームオーバー画面のアイドルスクロール
+            if (currentState === GAME_STATE.START) {
+                bgSkyScroll -= 0.1;
+                bgMidScroll -= 0.3;
+                bgGroundScroll -= 1;
+                if (bgSkyScroll <= -canvas.width) bgSkyScroll = 0;
+                if (bgMidScroll <= -canvas.width) bgMidScroll = 0;
+                if (bgGroundScroll <= -40) bgGroundScroll = 0;
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- 入力（操作）制御 ---
+        function triggerJump() {
+            // カウントダウン中やクリアアニメーション中はジャンプ不可
+            if ((currentState === GAME_STATE.PLAYING) && player) {
+                player.jump();
+            }
+        }
+
+        // キーボード操作
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                triggerJump();
+            }
+        });
+
+        // 画面タップ・クリック操作
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            triggerJump();
+        }, { passive: false });
+
+        canvas.addEventListener('mousedown', (e) => {
+            triggerJump();
+        });
+
+        document.getElementById('mobileJumpBtn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            triggerJump();
+        }, { passive: false });
+
+        document.getElementById('mobileJumpBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            triggerJump();
+        });
+
+        // --- ボタン紐付け ---
+        document.getElementById('howToToggleBtn').addEventListener('click', () => {
+            document.getElementById('howToPanel').classList.toggle('hidden');
+        });
+        document.getElementById('noriModeBtn').addEventListener('click', () => selectBgmMode('nori'));
+        document.getElementById('shinmiriModeBtn').addEventListener('click', () => selectBgmMode('shinmiri'));
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
+        document.getElementById('retryGameBtn').addEventListener('click', returnToTitle);
+        document.getElementById('restartGameBtn').addEventListener('click', returnToTitle);
+        updateModeButtons();
+
+        // ゲーム起動
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
