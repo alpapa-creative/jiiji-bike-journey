@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>じいじのバイク旅 〜愛媛から鎌倉へ〜</title>
     <script>
-        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1448';
+        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1501';
         const currentHtmlVersion = new URLSearchParams(window.location.search).get('htmlv');
         if (currentHtmlVersion !== window.__JIJI_BUILD_VERSION) {
             const cacheBustedUrl = new URL(window.location.href);
@@ -480,12 +480,19 @@
         const canvas = document.getElementById('gameCanvas');
         const gameViewport = document.getElementById('gameViewport');
         const ctx = canvas.getContext('2d');
+        const PLAY_LOGICAL_WIDTH = 768;
+        const PLAY_LOGICAL_HEIGHT = 432;
 
         function resizeCanvas() {
             const containerWidth = gameViewport.clientWidth;
             const isMobileMenu = window.matchMedia('(max-width: 639px)').matches && gameViewport.classList.contains('is-menu');
-            canvas.width = containerWidth;
-            canvas.height = isMobileMenu ? gameViewport.clientHeight : containerWidth * (9 / 16);
+            if (isMobileMenu) {
+                canvas.width = containerWidth;
+                canvas.height = gameViewport.clientHeight;
+            } else {
+                canvas.width = PLAY_LOGICAL_WIDTH;
+                canvas.height = PLAY_LOGICAL_HEIGHT;
+            }
         }
 
         function setGameViewportMode(mode) {
@@ -545,7 +552,7 @@
             stage3: 'images/ステージ3.png',
             stage4: 'images/ステージ4.png'
         };
-        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1448';
+        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1501';
         const ASSET_VERSION = BUILD_VERSION;
         const CHROMA_KEY_IMAGES = new Set(['player', 'playerJump', 'boar', 'boarRun', 'house', 'grandkids', 'grandkidsWave']);
         console.info(`じいじのバイク旅 build: ${BUILD_VERSION}`);
