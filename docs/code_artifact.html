@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>じいじのバイク旅 〜愛媛から鎌倉へ〜</title>
     <script>
-        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1550';
+        window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-1604';
         const currentHtmlVersion = new URLSearchParams(window.location.search).get('htmlv');
         if (currentHtmlVersion !== window.__JIJI_BUILD_VERSION) {
             const cacheBustedUrl = new URL(window.location.href);
@@ -270,7 +270,7 @@
                 ジャンプ
             </button>
             <div id="mobileSupportBubble" class="support-bubble flex items-center gap-2">
-                <img id="mobileSupportImage" class="h-16 w-20 flex-none object-contain" src="images/こどもたち.png" alt="こどもたち">
+                <img id="mobileSupportImage" class="h-16 w-20 flex-none object-contain" src="images/grandkids-1.png" alt="こどもたち">
                 <div class="support-bubble-text relative min-h-14 flex-1 rounded-lg border-2 border-yellow-400 bg-orange-50 px-4 py-3 text-sm font-bold leading-snug text-stone-900 shadow-[0_4px_0_rgba(0,0,0,0.35)]">
                     <span id="mobileSupportText">じいじ、いけー！</span>
                 </div>
@@ -623,20 +623,20 @@
         // 画像を使う場合は、HTMLと同じフォルダの images/ に画像を置き、相対パスを入れる。
         // 未設定または読み込み失敗時は、既存のCanvas描画に自動で戻る。
         const IMAGE_SOURCES = {
-            fujitaShop: 'images/藤田建具店.png',
+            fujitaShop: 'images/fujita-shop.png',
             player: 'images/bike-jiiji.png',
             playerJump: 'images/bike-jiiji-jump.png',
-            boar: 'images/イノシシ.png',
-            boarRun: 'images/イノシシ2.png',
-            house: 'images/一軒家.png',
-            grandkids: 'images/こどもたち.png',
-            grandkidsWave: 'images/こどもたち2.png',
-            stage1: 'images/ステージ1.png',
-            stage2: 'images/ステージ2.png',
-            stage3: 'images/ステージ3.png',
-            stage4: 'images/ステージ4.png'
+            boar: 'images/boar-1.png',
+            boarRun: 'images/boar-2.png',
+            house: 'images/house.png',
+            grandkids: 'images/grandkids-1.png',
+            grandkidsWave: 'images/grandkids-2.png',
+            stage1: 'images/stage-1.png',
+            stage2: 'images/stage-2.png',
+            stage3: 'images/stage-3.png',
+            stage4: 'images/stage-4.png'
         };
-        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1550';
+        const BUILD_VERSION = window.__JIJI_BUILD_VERSION || 'jiiji-bike-2026-05-26-1604';
         const ASSET_VERSION = BUILD_VERSION;
         const CHROMA_KEY_IMAGES = new Set(['player', 'playerJump', 'boar', 'boarRun', 'house', 'grandkids', 'grandkidsWave']);
         console.info(`じいじのバイク旅 build: ${BUILD_VERSION}`);
