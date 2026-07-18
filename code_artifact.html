@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>じいじのバイク旅 〜愛媛から鎌倉へ〜</title>
+    <title>じいじのバイク旅 〜瀬戸内から湘南へ〜</title>
     <script>
         window.__JIJI_BUILD_VERSION = 'jiiji-bike-2026-05-26-2230';
         const currentHtmlVersion = new URLSearchParams(window.location.search).get('htmlv');
@@ -108,7 +108,7 @@
         <div class="flex justify-between items-center bg-stone-950 p-2 sm:p-3 rounded-lg border-2 border-stone-600 gap-2">
             <div>
                 <h1 class="text-lg sm:text-2xl font-bold text-yellow-400 tracking-wider">じいじのバイク旅</h1>
-                <p class="text-[10px] sm:text-xs text-stone-400">藤田建具店から目指せ、鎌倉の孫たちの家！</p>
+                <p class="text-[10px] sm:text-xs text-stone-400">じいじの家から目指せ、湘南の孫たちの家！</p>
             </div>
             <!-- 音声オン/オフボタン -->
             <button id="soundToggleBtn" class="px-3 py-1 bg-stone-700 hover:bg-stone-600 rounded text-xs transition border border-stone-500">
@@ -119,7 +119,7 @@
         <!-- 進捗バー（現在地メーター） -->
         <div class="bg-stone-950 p-2 sm:p-3 rounded-lg border-2 border-stone-600 flex flex-col gap-1">
             <div class="flex justify-between text-[10px] sm:text-xs text-stone-300">
-                <span class="font-bold text-orange-400">藤田建具店</span>
+                <span class="font-bold text-orange-400">じいじの家</span>
                 <span id="currentAreaText" class="text-yellow-300 font-bold">しまなみ海道を快走中！</span>
                 <span class="font-bold text-red-400">孫たちの家</span>
             </div>
@@ -139,9 +139,9 @@
             </div>
             <div class="flex justify-between text-[10px] text-stone-500 px-1 mt-1">
                 <span>0km</span>
-                <span>212km (関西)</span>
-                <span>424km (富士山)</span>
-                <span>848km (鎌倉・孫の家)</span>
+                <span>25km (関西)</span>
+                <span>50km (富士山)</span>
+                <span>100km (孫たちの家)</span>
             </div>
         </div>
 
@@ -155,7 +155,7 @@
                 <div class="bg-stone-900/95 border-4 border-yellow-500 p-4 sm:p-6 rounded-xl max-w-lg w-full max-h-full overflow-y-auto pixel-border relative overflow-hidden">
                     <div class="absolute -top-10 -right-10 w-24 h-24 bg-yellow-500/10 rounded-full blur-xl"></div>
                     <h2 class="text-3xl sm:text-4xl font-extrabold text-yellow-400 mb-2 tracking-widest animate-bounce">じいじのバイク旅</h2>
-                    <p class="text-sm text-yellow-500 font-bold mb-4">〜 愛媛の建具店から鎌倉の孫の家へ 〜</p>
+                    <p class="text-sm text-yellow-500 font-bold mb-4">〜 瀬戸内のじいじの家から湘南の孫の家へ 〜</p>
 
                     <button id="howToToggleBtn" type="button" class="w-full mb-3 py-2 text-sm font-bold text-yellow-300 bg-stone-800 border-2 border-stone-600 rounded-md transition hover:bg-stone-700">
                         遊び方
@@ -163,7 +163,7 @@
 
                     <div id="howToPanel" class="hidden mb-4 text-[11px] text-left">
                         <div class="bg-stone-950/70 p-2.5 rounded border border-stone-700 mb-2 text-stone-300 leading-relaxed">
-                            じいじがバイクに乗って、愛媛の「藤田建具店」から鎌倉の「孫たちの家」まで、848kmの超ロングツーリングに出発！<br>
+                            じいじがバイクに乗って、瀬戸内の「じいじの家」から湘南の「孫たちの家」まで、100kmのツーリングに出発！<br>
                             エリアの後半は難易度が急上昇。<strong class="text-yellow-400">2段ジャンプ</strong>を駆使して、危険を避けるんじゃ！
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2 text-stone-400">
@@ -184,7 +184,7 @@
                         <div class="bg-stone-950/70 p-2.5 rounded border border-stone-700">
                             <span class="text-emerald-400 font-bold block mb-1">回復</span>
                             <div class="space-y-1 text-stone-300">
-                                <div><span class="font-bold text-stone-200">愛媛みかん:</span> ライフが1回復</div>
+                                <div><span class="font-bold text-stone-200">瀬戸内みかん:</span> ライフが1回復</div>
                                 <div><span class="font-bold text-stone-200">静岡茶:</span> ライフが1回復</div>
                                 <div><span class="font-bold text-stone-200">おにぎり:</span> 元気いっぱいに回復</div>
                             </div>
@@ -223,7 +223,7 @@
                     <div class="bg-stone-950 p-3 rounded-lg border border-stone-800 my-4">
                         <p class="text-xs text-stone-400">到達エリア</p>
                         <p id="overAreaName" class="text-lg font-bold text-yellow-400">しまなみ海道</p>
-                        <p class="text-xs text-stone-500 mt-1">走破距離: <span id="overDistance" class="text-white font-bold">120</span> / 848 km</p>
+                        <p class="text-xs text-stone-500 mt-1">走破距離: <span id="overDistance" class="text-white font-bold">120</span> / 100 km</p>
                     </div>
                     <button id="retryGameBtn" class="w-full py-3 text-lg font-bold text-black rounded-lg pixel-btn-yellow tracking-wider">
                         タイトルに戻る
@@ -237,7 +237,7 @@
                     <h2 class="text-3xl font-extrabold text-emerald-400 mb-1 animate-pulse">ゴール到着！！</h2>
                     <p class="text-yellow-300 font-bold text-sm mb-4">無事完走！孫たちが待ってるぞ！</p>
                     <p class="text-xs text-stone-300 leading-relaxed mb-6">
-                        じいじは数々の困難（とカラス）を乗り越え、藤田建具店から848kmを走り抜いて、ついに鎌倉の「孫たちの家」にたどり着きました！みんな大喜びです！
+                        じいじは数々の困難（とカラス）を乗り越え、じいじの家から100kmを走り抜いて、ついに湘南の「孫たちの家」にたどり着きました！みんな大喜びです！
                     </p>
                     <div class="bg-stone-950 p-3 rounded-lg border border-stone-800 mb-6">
                         <p class="text-xs text-stone-400">残りライフ</p>
@@ -260,7 +260,7 @@
                 <div class="bg-black/60 px-3 py-1.5 rounded-lg text-right border border-stone-700">
                     <span class="text-xs text-stone-400">道のり: </span>
                     <span id="hudDistance" class="font-bold text-yellow-400 text-sm">0</span>
-                    <span class="text-xs text-stone-300"> / 848 km</span>
+                    <span class="text-xs text-stone-300"> / 100 km</span>
                 </div>
             </div>
         </div>
@@ -282,8 +282,8 @@
     <script>
         // --- サウンドシステム (Web Audio API) ---
         const BGM_SOURCES = {
-            nori: 'bgm-bike-jiiji.mp3',
-            shinmiri: 'bgm-bike-jiiji-shinmiri.mp3'
+            nori: 'bgm-nori.mp3',
+            shinmiri: 'bgm-shinmiri.mp3'
         };
         const BGM_VOLUME = 0.35;
 
@@ -564,7 +564,7 @@
             const message = SUPPORT_MESSAGES_BY_DISTANCE[milestone];
             if (!message) return;
             mobileSupportText.textContent = message;
-            mobileSupportImage.src = `${IMAGE_SOURCES[(milestone / 50) % 2 === 0 ? 'grandkids' : 'grandkidsWave']}?v=${ASSET_VERSION}`;
+            mobileSupportImage.src = `${IMAGE_SOURCES[(milestone / 10) % 2 === 0 ? 'grandkids' : 'grandkidsWave']}?v=${ASSET_VERSION}`;
             mobileSupportBubble.classList.add('is-visible');
         }
 
@@ -574,7 +574,7 @@
                 return;
             }
 
-            const milestone = Math.floor(gameDistance / 50) * 50;
+            const milestone = Math.floor(gameDistance / 10) * 10;
             if (SUPPORT_MESSAGES_BY_DISTANCE[milestone] && milestone !== lastSupportMilestone) {
                 lastSupportMilestone = milestone;
                 showSupportBubble(milestone);
@@ -596,7 +596,7 @@
         };
         let currentState = GAME_STATE.START;
 
-        const TARGET_DISTANCE = 848; // 総目標走行距離 km
+        const TARGET_DISTANCE = 100; // 総目標走行距離 km（デモ版は短縮）
         const GRAVITY = 0.6;
         const JUMP_FORCE = -11;
         const BASE_SPEED = 5;
@@ -619,7 +619,7 @@
         // 画像を使う場合は、HTMLと同じフォルダの images/ に画像を置き、相対パスを入れる。
         // 未設定または読み込み失敗時は、既存のCanvas描画に自動で戻る。
         const IMAGE_SOURCES = {
-            fujitaShop: 'images/fujita-shop.png',
+            jiijiHouse: 'images/jiiji-house.png',
             player: 'images/bike-jiiji.png',
             playerJump: 'images/bike-jiiji-jump.png',
             boar: 'images/boar-1.png',
@@ -1367,22 +1367,15 @@
         let lastSupportMilestone = 0;
         let supportBubbleTimer = 0;
         const SUPPORT_MESSAGES_BY_DISTANCE = {
-            50: 'じいじ、出発したね！気をつけて来てね！',
-            100: 'もう100km！じいじのバイク、かっこいい！',
-            150: 'その調子！でも休憩もしてね！',
-            200: 'そろそろおなかすいてない？みかん食べてね！',
-            250: '関西まで来た？じいじ、すごい！',
-            300: '遠くまで走ってるね！みんなで応援してるよ！',
-            350: '風に負けないで、じいじ！',
-            400: '半分近くまで来たね！あと少しずつだよ！',
-            450: '富士山見えた？写真撮ってきてね！',
-            500: '500km突破！じいじ、ほんとにすごい！',
-            550: '暗くなってきたかな？安全運転でね！',
-            600: 'もう少しでこっち側だよ！待ってるよ！',
-            650: 'じいじ、疲れてない？無理しないでね！',
-            700: 'あとちょっと！みんなで玄関で待ってるよ！',
-            750: '鎌倉まであと少し！がんばれー！',
-            800: 'じいじの音が聞こえてきそう！'
+            10: 'じいじ、出発したね！気をつけて来てね！',
+            20: 'もう20km！じいじのバイク、かっこいい！',
+            30: 'そろそろおなかすいてない？みかん食べてね！',
+            40: '関西まで来た？じいじ、すごい！',
+            50: '半分まで来たね！富士山見えた？',
+            60: '暗くなってきたかな？安全運転でね！',
+            70: 'じいじ、疲れてない？無理しないでね！',
+            80: '湘南まであと少し！がんばれー！',
+            90: 'じいじの音が聞こえてきそう！'
         };
 
         function checkCollision(a, b) {
@@ -1403,13 +1396,13 @@
         function getCurrentArea() {
             const ratio = gameDistance / TARGET_DISTANCE;
             if (ratio < 0.25) {
-                return { name: 'しまなみ海道・愛媛エリア', key: 'ehime', stageImage: 'stage1' };
+                return { name: 'しまなみ海道・瀬戸内エリア', key: 'setouchi', stageImage: 'stage1' };
             } else if (ratio < 0.5) {
                 return { name: 'なにわの街・関西エリア', key: 'kansai', stageImage: 'stage2' };
             } else if (ratio < 0.75) {
                 return { name: '駿河湾・富士山エリア', key: 'fuji', stageImage: 'stage3' };
             } else {
-                return { name: '湘南・鎌倉エリア', key: 'kamakura', stageImage: 'stage4' };
+                return { name: '湘南エリア', key: 'shonan', stageImage: 'stage4' };
             }
         }
 
@@ -1456,7 +1449,7 @@
             
                 // 1. 空のグラデーション
                 let skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-                if (area.key === 'ehime') {
+                if (area.key === 'setouchi') {
                     skyGrad.addColorStop(0, '#7dd3fc');
                     skyGrad.addColorStop(1, '#bae6fd');
                 } else if (area.key === 'kansai') {
@@ -1480,7 +1473,7 @@
                 ctx.translate(bgSkyScroll, 0);
                 for (let i = 0; i < 2; i++) {
                     const xOffset = i * canvas.width;
-                    if (area.key === 'ehime') {
+                    if (area.key === 'setouchi') {
                         // しまなみ大橋
                         ctx.fillStyle = 'rgba(100, 116, 139, 0.3)';
                         ctx.beginPath();
@@ -1529,7 +1522,7 @@
                 ctx.translate(bgMidScroll, 0);
                 for (let i = 0; i < 2; i++) {
                     const xOffset = i * canvas.width;
-                    if (area.key === 'ehime') {
+                    if (area.key === 'setouchi') {
                         ctx.fillStyle = '#38bdf8';
                         ctx.fillRect(xOffset, canvas.height - 100, canvas.width, 15);
                         ctx.fillStyle = '#0284c7';
@@ -1556,16 +1549,16 @@
             }
 
             // --- STREAMING_CHUNK: Start & Goal Graphics Drawing ---
-            // 4. 【スタート地点演出】背景に「藤田建具店」を描画 (0〜15km付近の間スクロール)
-            const fujitaX = 100 - (gameDistance * 100);
-            if (fujitaX > -300) {
-                drawFujitaShop(fujitaX, canvas.height - 85);
+            // 4. 【スタート地点演出】背景に「じいじの家」を描画 (0〜15km付近の間スクロール)
+            const shopX = 100 - (gameDistance * 100);
+            if (shopX > -300) {
+                drawJiijiHouse(shopX, canvas.height - 85);
             }
 
             // 5. 【ゴール地点演出】背景に「孫たちの家」とお孫さんたちを描画
             const remainingDist = TARGET_DISTANCE - gameDistance;
-            if (remainingDist < 10) { // ゴール直前 (10km未満)
-                const goalProgress = Math.min(1, Math.max(0, (10 - remainingDist) / 10));
+            if (remainingDist < 1.5) { // ゴール直前 (1.5km未満)
+                const goalProgress = Math.min(1, Math.max(0, (1.5 - remainingDist) / 1.5));
                 const houseStartX = canvas.width + 120;
                 const houseStopX = player ? player.x + player.width + 95 : canvas.width * 0.42;
                 goalHouseX = houseStartX + ((houseStopX - houseStartX) * goalProgress);
@@ -1590,14 +1583,14 @@
             ctx.fillRect(0, canvas.height - 85, canvas.width, 4);
         }
 
-        // --- STREAMING_CHUNK: Fujita Shop & House Drawing ---
-        // 「藤田建具店」の店舗ベクター描画
-        function drawFujitaShop(x, groundY) {
+        // --- STREAMING_CHUNK: Jiiji House & House Drawing ---
+        // 「じいじの家」の店舗ベクター描画
+        function drawJiijiHouse(x, groundY) {
             ctx.save();
             ctx.translate(x, groundY - 100);
 
-            if (hasGameImage('fujitaShop')) {
-                drawImageFit(gameImages.fujitaShop, -10, -12, 180, 130);
+            if (hasGameImage('jiijiHouse')) {
+                drawImageFit(gameImages.jiijiHouse, -10, -12, 180, 130);
                 ctx.restore();
                 return;
             }
@@ -1638,7 +1631,7 @@
                 ctx.stroke();
             }
 
-            // 看板（「藤田建具店」）
+            // 看板（「じいじの家」）
             ctx.fillStyle = '#fffdfa'; // 白い木目調
             ctx.fillRect(25, -5, 110, 20);
             ctx.strokeStyle = '#451a03';
@@ -1648,7 +1641,7 @@
             ctx.fillStyle = '#0f172a'; // 黒文字
             ctx.font = 'bold 11px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('藤田建具店', 80, 10);
+            ctx.fillText('じいじの家', 80, 10);
 
             ctx.restore();
         }
@@ -1946,7 +1939,7 @@
                 }
 
                 // スピード自動増加
-                gameSpeed = BASE_SPEED + (gameDistance / 150);
+                gameSpeed = BASE_SPEED + (gameDistance / 18); // 100km版でも848km版と同等の加速カーブ
 
                 // UI更新
                 const progressPercent = (gameDistance / TARGET_DISTANCE) * 100;
@@ -1984,7 +1977,7 @@
                     
                     const area = getCurrentArea();
                     let itemType = 'MIKAN';
-                    if (area.key === 'ehime') itemType = 'MIKAN';
+                    if (area.key === 'setouchi') itemType = 'MIKAN';
                     else if (area.key === 'fuji') itemType = 'TEA';
                     else itemType = 'RICE';
 

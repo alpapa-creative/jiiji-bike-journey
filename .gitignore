@@ -1,1 +1,4 @@
 .DS_Store
+dev-server.cjs
+profile-image.png
+*.log
